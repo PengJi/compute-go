@@ -8,5 +8,4 @@ edition = "2021"
 [dependencies]
 kvm-bindings = "0.6.0"
 kvm-ioctls = "0.15.0"
-vm-memory = "*"
 libc = "0.2.147"
