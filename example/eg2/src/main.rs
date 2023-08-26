@@ -4,15 +4,11 @@ use kvm_bindings::{kvm_regs, kvm_sregs, kvm_userspace_memory_region};
 use kvm_ioctls::{Kvm, VcpuFd, VmFd};
 use libc::{c_void, mmap, MAP_ANONYMOUS, MAP_NORESERVE, MAP_SHARED, PROT_READ, PROT_WRITE};
 
-extern crate kvm_bindings;
-extern crate kvm_ioctls;
-extern crate libc;
-
 struct Vm {
     kvm: Kvm,
     vm: VmFd,
     hva_ram_start: usize,
-    vcpu: Option<Vcpu>,
+    vcpu: Option<VcpuFd>,
 }
 
 impl Vm {
@@ -27,7 +23,7 @@ impl Vm {
         }
     }
 
-    fn setup_memroy(&mut self, ram_size: size) {
+    fn setup_memroy(&mut self, ram_size: usize) {
         // 大小按照 4096 对齐
         let ram_size = (ram_size + 0xfff) & !0xfff;
 
@@ -108,7 +104,7 @@ impl Vm {
     fn run(&mut self) {
         let vcpu = self.vcpu.as_mut().unwrap();
         loop {
-            match vcpu.run().except("run failed") {
+            match vcpu.run().expect("run failed") {
                 kvm_ioctls::VcpuExit::Hlt => {
                     println!("Hlt");
                     std::thread::sleep(std::time::Duration::from_millis(1000));
@@ -130,7 +126,7 @@ impl Vm {
 }
 
 fn main() {
-    let image = PathBuf::from("vmlinux");
+    let image = PathBuf::from("kernel.bin");
     let mut vm = Vm::new();
     let mem_size = 0x1000;
     vm.setup_memroy(mem_size);
