@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
-use kvm_bindings::{kvm_regs, kvm_sregs, kvm_userspace_memory_region};
+use kvm_bindings::kvm_userspace_memory_region;
 use kvm_ioctls::{Kvm, VcpuFd, VmFd};
-use libc::{c_void, mmap, MAP_ANONYMOUS, MAP_NORESERVE, MAP_SHARED, PROT_READ, PROT_WRITE};
+use libc::{c_void, mmap, MAP_ANONYMOUS, MAP_SHARED, PROT_READ, PROT_WRITE};
 
 struct Vm {
     kvm: Kvm,

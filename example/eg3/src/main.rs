@@ -2,7 +2,3 @@ use kvm_bindings::{kvm_userspace_memory_region, KVM_MAX_CPUID_ENTRIES, KVM_MEM_L
 use kvm_ioctls::{Kvm, VcpuFd, VmFd};
 use vm_memory::{Bytes, GuestAddress, GuestMemory, GuestMemoryMmap};
 
-
-fn main() {
-    println!("Hello, KVM");
-}
