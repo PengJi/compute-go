@@ -224,7 +224,12 @@ cd -
 
 ## 启动虚拟机
 ```sh
-lkvm run --kernel linux-4.19.288/arch/x86/boot/bzImage --disk rootfs.img --network virtio --console serial  --name vm1
+lkvm run \
+--kernel linux-4.19.288/arch/x86/boot/bzImage \
+--disk rootfs.img \
+--network virtio \
+--console serial \
+--name vm1
 >>
   Info: # lkvm run -k linux-4.19.288/arch/x86/boot/bzImage -m 448 -c 4 --name vm1
 [    0.000000] Linux version 4.19.288 (jipeng@rvm) (gcc version 11.3.0 (Ubuntu 11.3.0-1ubuntu1~22.04.1)) #1 SMP Sun Jul 23 09:56:54 CST 2023
