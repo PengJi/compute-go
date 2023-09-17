@@ -10,10 +10,27 @@ kvm-bindings = "0.6.0"
 kvm-ioctls = "0.15.0"
 libc = "0.2.147"
 vm-memory = "0.12.1"
+vmm-sys-util = "0.11.1"
+
+# libc = ">=0.2.39"
+# kvm-ioctls = "0.6.0"
+# kvm-bindings = "0.3.0"
+# vmm-sys-util = "0.7.0"
+
+[[bin]]
+name = "stratovirt"
+path = "src/main.rs"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+lto = true
 
 [workspace]
 members = [
-    "example/eg1",
-    "example/eg2",
-    "example/eg3",
+    "example/eg1-rs",
+    "example/eg2-rs",
+    "example/eg3-rs",
 ]
