@@ -75,14 +75,16 @@ info registers
 qemu-system-x86_64 -device help
 ```
 
-## 使用 qemu
-### 配置参数详解
+## 配置参数详解
 配置 CPU
 ```bash
 
 ```
 
-### 安装 guest OS 
+## qemu debug
+[Debugging early startup of KVM with GDB, when launched by libvirtd](https://www.berrange.com/posts/2011/10/12/debugging-early-startup-of-kvm-with-gdb-when-launched-by-libvirtd/)  
+
+## 安装 guest OS 
 创建 qcow2 磁盘
 ```bash
 qemu-img create -f qcow2 centos-7_9.img 20G
