@@ -80,7 +80,7 @@ cargo build --release
 ```bash
 ./target/release/stratovirt \
     -machine microvm \
-    -kernel ./vmlinux.bin \
+    -kernel /tmp/vmlinux.bin\
     -append "console=ttyS0 reboot=k panic=1 root=/dev/ram rdinit=/bin/sh" \
     -initrd /tmp/StratoVirt-initrd \
     -qmp unix:./qmp.sock,server,nowait \
