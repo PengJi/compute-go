@@ -1,7 +1,11 @@
 命令行启动 qemu
 ```sh
-/usr/libexec/qemu-kvm -name guest=187306a8-5cfb-4d2d-967b-a23d7714b087,debug-threads=on \
--cpu host -m size=4194304k,slots=255,maxmem=4194304000k -realtime mlock=off -smp 4,maxcpus=240,sockets=240,cores=1,threads=1 \
+/usr/libexec/qemu-kvm \
+-name guest=187306a8-5cfb-4d2d-967b-a23d7714b087,debug-threads=on \
+-cpu host \
+-m size=4194304k,slots=255,maxmem=4194304000k \
+-realtime mlock=off \
+-smp 4,maxcpus=240,sockets=240,cores=1,threads=1 \
 -device piix3-usb-uhci,id=usb,bus=pci.0,addr=0x1.0x2 \
 -device nec-usb-xhci,p2=15,p3=15,id=usb1,bus=pci.0,addr=0x5 \
 -device usb-ehci,id=usb2,bus=pci.0,addr=0x6 \

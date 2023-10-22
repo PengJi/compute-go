@@ -1,5 +1,39 @@
 # [libvirt](https://gitlab.com/libvirt/libvirt)
 
+# 安装
+## 从源码安装
+```bash
+sudo apt -y install libgnutls-dane0 libgnutls-openssl27 libgnutls28-dev libgnutlsxx28 libnl-3-dev libnl-route-3-dev libpciaccess-dev libxml2-utils xsltproc libdevmapper-dev libyajl-dev libyajl2 libxml2-dev
+
+git clone git@gitlab.com:libvirt/libvirt.git
+
+cd $HOME
+mkdir -p libvirt_build
+cd libvirt
+
+#  for libvirt 6.6.0 and older
+mkdir build
+cd build
+../autogen.sh --prefix=$HOME/libvirt_build
+sudo make -j$(nproc)
+# make install is required only once to generate the config and log file structure
+sudo make install
+
+#  for libvirt 6.7.0 and later
+$ meson build --prefix=$HOME/libvirt_build
+$ ninja -C build
+# ninja -C build install is required only once to generate the config and log file structure
+$ sudo ninja -C build install
+```
+
+## 从 deb 包安装
+```bash
+sudo apt install libvirt-daemon virt-manager -y
+```
+
+[build libvirt](https://developer.ibm.com/tutorials/compiling-libvirt-and-qemu/)
+
+
 一些典型的 libvirt xml
 ```xml
 <!-- usb cdrom -->
