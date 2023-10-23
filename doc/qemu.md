@@ -18,6 +18,7 @@ tar xvJf qemu-7.0.0.tar.xz
 # 编译安装并配置 RISC-V 支持
 cd qemu-7.0.0
 ./configure \
+--prefix=$HOME/qemu_build \
 --target-list=riscv64-softmmu,riscv64-linux-user,x86_64-softmmu,x86_64-linux-user \
 --enable-sdl  # 支持图形界面
 # Install prefix               : /usr/local
@@ -36,15 +37,14 @@ cd qemu-7.0.0
 # Source path                  : /home/jipeng/app/qemu-7.0.0
 # GIT submodules               : ui/keycodemapdb tests/fp/berkeley-testfloat-3 tests/fp/berkeley-softfloat-3 dtc capstone slirp
 
-
 # 编译
 make -j$(nproc)
 
 # 安装
 sudo make install
-# 这种方式可能与安装的其他版本冲突，另外一种更灵活的做法是将编译生成二进制文件的路径添加到 PATH 环境变量中，例如：
+# 文件位于 $HOME/qemu_build
 vi /etc/profile
-export PATH=$PATH:/path/to/qemu-7.0.0/build
+export PATH=$PATH:$HOME/qemu_build
 source /etc/profile
 
 # 确认安装的版本
@@ -75,22 +75,16 @@ info registers
 qemu-system-x86_64 -device help
 ```
 
-## 配置参数详解
-配置 CPU
-```bash
-
-```
-
 ## qemu debug
 [Debugging early startup of KVM with GDB, when launched by libvirtd](https://www.berrange.com/posts/2011/10/12/debugging-early-startup-of-kvm-with-gdb-when-launched-by-libvirtd/)  
 
 ## 安装 guest OS 
-创建 qcow2 磁盘
+### 创建 qcow2 磁盘
 ```bash
 qemu-img create -f qcow2 centos-7_9.img 20G
 ```
 
-启动 guest OS
+### 启动 guest OS
 centos7.9 version 3.10
 ```sh
 qemu-system-x86_64 \
@@ -102,14 +96,12 @@ qemu-system-x86_64 \
 -device nec-usb-xhci,p2=15,p3=15,id=usb1,bus=pci.0,addr=0x5 \
 -device usb-ehci,id=usb2,bus=pci.0,addr=0x6 \
 -device piix3-usb-uhci,id=usb3,bus=pci.0,addr=0x7 \
--drive if=none,format=qcow2,file=/home/jipeng/centos-7_9.img,id=disk0 \
+-drive if=none,format=qcow2,file=/home/jipeng/vms/ubuntu_desktop_20.04.6.img,id=disk0 \
 -device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x9,drive=disk0,id=virtio-disk0,bootindex=1,write-cache=on \
--drive file=/home/jipeng/Downloads/CentOS-7-x86_64-DVD-2009.iso,file.locking=off,format=raw,if=none,id=drive-ide0-0-0,readonly=on \
+-drive file=/home/jipeng/Downloads/iso/ubuntu-20.04.6-desktop-amd64.iso,file.locking=off,format=raw,if=none,id=drive-ide0-0-0,readonly=on \
 -device ide-cd,bus=ide.0,unit=0,drive=drive-ide0-0-0,id=ide0-0-0,bootindex=2 \
--vnc :0 \
--monitor stdio \
--chardev socket,id=qmp,port=4444,host=localhost,server=on \
--mon chardev=qmp,mode=control,pretty=on
+-vnc 127.0.0.1:66 \
+-monitor stdio
 ```
 
 openEuler 22.03 version 5.10
@@ -127,16 +119,13 @@ qemu-system-x86_64 \
 -device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x9,drive=disk0,id=virtio-disk0,bootindex=1,write-cache=on \
 -drive file=/home/jipeng/Downloads/openEuler-22.03-LTS-x86_64-dvd.iso,file.locking=off,format=raw,if=none,id=drive-ide0-0-0,readonly=on \
 -device ide-cd,bus=ide.0,unit=0,drive=drive-ide0-0-0,id=ide0-0-0,bootindex=2 \
--vnc :1 \
+-vnc 127.0.0.1:67 \
 -monitor stdio 
 ```
 
-指定 vnc 地址和端口，可使用 vnc viewer 连接，比如：192.168.74.83:5
-`-vnc 192.168.74.83:5`
-连接时的地址为 192.168.74.83:5905
-
-在启动 qemu 之后，进入交互式命令行，之后可执行 hmp 命令
-`-monitor stdio`   
+`-vnc`           指定 vnc 地址和端口，可使用 vnc viewer 连接，比如：192.168.74.83:5905
+`-monitor stdio` 在启动 qemu 之后，进入交互式命令行，可执行 hmp 命令
+  
 
 通过 tcp 与 qemu 交互，可执行 qmp 命令
 ```bash
