@@ -1,6 +1,7 @@
 Build a hypervisor based on KVM with Rust
 
 目标：
+有用
 轻量低噪、软硬协同、安全
 
 应用场景
