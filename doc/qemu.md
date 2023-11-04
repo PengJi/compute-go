@@ -63,6 +63,15 @@ qemu-x86_64 --version
 `ctrl+a c`
 info registers
 
+切换qemu控制台
+`ctrl+alt+2`
+
+切换回调试kernel
+`ctrl+alt+1`
+
+将被qemu VM捕获的鼠标焦点切换回host
+`ctrl+alt`
+
 待探索
 `ctrl+a h`
 `ctrl+a s`
