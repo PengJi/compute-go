@@ -1,2 +1,3 @@
+调试/测试工具
 
-[strace](https://wangchujiang.com/linux-command/c/strace.html)  
+
