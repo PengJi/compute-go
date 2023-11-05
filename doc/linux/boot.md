@@ -6,6 +6,7 @@ GRUB
 Kernel
 Init
 Runlevel
+![osbootflow](images/OSBootFlow.png)
 
 [Vmlinux的启动](https://xydong.gitee.io/seedx/post/linux/before_start_kernel/)  
 [Linux启动流程](https://www.binss.me/blog/boot-process-of-linux/)  

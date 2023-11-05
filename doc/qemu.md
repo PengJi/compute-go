@@ -15,7 +15,7 @@ wget https://download.qemu.org/qemu-7.0.0.tar.xz
 # 解压
 tar xvJf qemu-7.0.0.tar.xz
 
-# 编译安装并配置 RISC-V 支持
+# 编译安装并配置 RISC-V 支持，安装在特定位置
 cd qemu-7.0.0
 ./configure \
 --prefix=$HOME/qemu_build \
@@ -52,6 +52,150 @@ qemu-system-riscv64 --version
 qemu-riscv64 --version
 qemu-system-x86_64 --version
 qemu-x86_64 --version
+```
+
+上述将 qemu 安装在了 $HOME/qemu_build 目录下，如果要使用 libvirt，需要安装到 `/usr`，指定 `--prefix=/usr`，libvirt 也默认安装在 `/usr`，
+具体的安装位置：
+```bash
+Installing subprojects/dtc/libfdt/libfdt.a to /usr/lib/x86_64-linux-gnu
+Installing trace/trace-events-all to /usr/share/qemu
+Installing qemu-system-riscv64 to /usr/bin
+Installing qemu-riscv64 to /usr/bin
+Installing qemu-system-x86_64 to /usr/bin
+Installing qemu-x86_64 to /usr/bin
+Installing qga/qemu-ga to /usr/bin
+Installing qemu-keymap to /usr/bin
+Installing qemu-img to /usr/bin
+Installing qemu-io to /usr/bin
+Installing qemu-nbd to /usr/bin
+Installing storage-daemon/qemu-storage-daemon to /usr/bin
+Installing qemu-edid to /usr/bin
+Installing qemu-bridge-helper to /usr/libexec
+Installing qemu-pr-helper to /usr/bin
+Installing pc-bios/edk2-aarch64-code.fd to /usr/share/qemu
+Installing pc-bios/edk2-arm-code.fd to /usr/share/qemu
+Installing pc-bios/edk2-arm-vars.fd to /usr/share/qemu
+Installing pc-bios/edk2-i386-code.fd to /usr/share/qemu
+Installing pc-bios/edk2-i386-secure-code.fd to /usr/share/qemu
+Installing pc-bios/edk2-i386-vars.fd to /usr/share/qemu
+Installing pc-bios/edk2-x86_64-code.fd to /usr/share/qemu
+Installing pc-bios/edk2-x86_64-secure-code.fd to /usr/share/qemu
+Installing pc-bios/keymaps/ar to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/bepo to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/cz to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/da to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/de to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/de-ch to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/en-gb to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/en-us to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/es to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/et to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/fi to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/fo to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/fr to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/fr-be to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/fr-ca to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/fr-ch to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/hr to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/hu to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/is to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/it to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/ja to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/lt to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/lv to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/mk to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/nl to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/no to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/pl to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/pt to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/pt-br to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/ru to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/th to /usr/share/qemu/keymaps
+Installing pc-bios/keymaps/tr to /usr/share/qemu/keymaps
+Installing /home/jipeng/qemu/subprojects/dtc/libfdt/fdt.h to /usr/include/
+Installing /home/jipeng/qemu/subprojects/dtc/libfdt/libfdt.h to /usr/include/
+Installing /home/jipeng/qemu/subprojects/dtc/libfdt/libfdt_env.h to /usr/include/
+Installing /home/jipeng/qemu/include/qemu/qemu-plugin.h to /usr/include/
+Installing new directory /var/run
+Installing /home/jipeng/qemu/build/meson-private/libfdt.pc to /usr/lib/x86_64-linux-gnu/pkgconfig
+Installing /home/jipeng/qemu/ui/icons/qemu_16x16.png to /usr/share/icons/hicolor/16x16/apps
+Installing /home/jipeng/qemu/ui/icons/qemu_24x24.png to /usr/share/icons/hicolor/24x24/apps
+Installing /home/jipeng/qemu/ui/icons/qemu_32x32.png to /usr/share/icons/hicolor/32x32/apps
+Installing /home/jipeng/qemu/ui/icons/qemu_48x48.png to /usr/share/icons/hicolor/48x48/apps
+Installing /home/jipeng/qemu/ui/icons/qemu_64x64.png to /usr/share/icons/hicolor/64x64/apps
+Installing /home/jipeng/qemu/ui/icons/qemu_128x128.png to /usr/share/icons/hicolor/128x128/apps
+Installing /home/jipeng/qemu/ui/icons/qemu_256x256.png to /usr/share/icons/hicolor/256x256/apps
+Installing /home/jipeng/qemu/ui/icons/qemu_512x512.png to /usr/share/icons/hicolor/512x512/apps
+Installing /home/jipeng/qemu/ui/icons/qemu_32x32.bmp to /usr/share/icons/hicolor/32x32/apps
+Installing /home/jipeng/qemu/ui/icons/qemu.svg to /usr/share/icons/hicolor/scalable/apps
+Installing /home/jipeng/qemu/ui/qemu.desktop to /usr/share/applications
+Installing /home/jipeng/qemu/pc-bios/bios.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/bios-256k.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/bios-microvm.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/qboot.rom to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/vgabios.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/vgabios-cirrus.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/vgabios-stdvga.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/vgabios-vmware.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/vgabios-qxl.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/vgabios-virtio.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/vgabios-ramfb.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/vgabios-bochs-display.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/vgabios-ati.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/openbios-sparc32 to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/openbios-sparc64 to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/openbios-ppc to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/QEMU,tcx.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/QEMU,cgthree.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/pxe-e1000.rom to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/pxe-eepro100.rom to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/pxe-ne2k_pci.rom to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/pxe-pcnet.rom to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/pxe-rtl8139.rom to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/pxe-virtio.rom to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/efi-e1000.rom to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/efi-eepro100.rom to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/efi-ne2k_pci.rom to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/efi-pcnet.rom to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/efi-rtl8139.rom to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/efi-virtio.rom to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/efi-e1000e.rom to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/efi-vmxnet3.rom to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/qemu-nsis.bmp to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/multiboot.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/multiboot_dma.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/linuxboot.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/linuxboot_dma.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/kvmvapic.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/pvh.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/s390-ccw.img to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/s390-netboot.img to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/slof.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/skiboot.lid to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/palcode-clipper to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/u-boot.e500 to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/u-boot-sam460-20100605.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/qemu_vga.ndrv to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/edk2-licenses.txt to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/hppa-firmware.img to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/opensbi-riscv32-generic-fw_dynamic.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/opensbi-riscv64-generic-fw_dynamic.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/npcm7xx_bootrom.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/vof.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/vof-nvram.bin to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/bamboo.dtb to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/canyonlands.dtb to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/petalogix-s3adsp1800.dtb to /usr/share/qemu
+Installing /home/jipeng/qemu/pc-bios/petalogix-ml605.dtb to /usr/share/qemu
+Installing /home/jipeng/qemu/build/pc-bios/descriptors/50-edk2-i386-secure.json to /usr/share/qemu/firmware
+Installing /home/jipeng/qemu/build/pc-bios/descriptors/50-edk2-x86_64-secure.json to /usr/share/qemu/firmware
+Installing /home/jipeng/qemu/build/pc-bios/descriptors/60-edk2-aarch64.json to /usr/share/qemu/firmware
+Installing /home/jipeng/qemu/build/pc-bios/descriptors/60-edk2-arm.json to /usr/share/qemu/firmware
+Installing /home/jipeng/qemu/build/pc-bios/descriptors/60-edk2-i386.json to /usr/share/qemu/firmware
+Installing /home/jipeng/qemu/build/pc-bios/descriptors/60-edk2-x86_64.json to /usr/share/qemu/firmware
+Installing /home/jipeng/qemu/pc-bios/keymaps/sl to /usr/share/qemu/keymaps
+Installing /home/jipeng/qemu/pc-bios/keymaps/sv to /usr/share/qemu/keymaps
+make[1]: Leaving directory '/home/jipeng/qemu/build
 ```
 
 # 使用 qemu
@@ -293,6 +437,18 @@ hmp 简化了 qmp，可以通过 monitor stdio 进入 hmp 命令行，也可以�
 命令行参数
 ```bash
 -chardev socket,id=charmonitor,path=/var/lib/libvirt/qemu/domain-1-ubuntu20.04-agent.sock,server,nowait \
+```
+
+# 配置网络
+```bash
+sudo brctl addbr br0
+sudo brctl addif br0 eth0
+sudo ifconfig eth0 0
+sudo dhclient br0
+sudo brctl show
+sudo qemu-system-x86_64 -kernel linux/arch/x86/boot/bzImage \
+       -append 'root=/dev/sda' -boot c -hda rootfs.img -k en-us \
+       -net nic -net tap,ifname=tap0
 ```
 
 [QEMU Guest Agent Protocol Reference](https://qemu.readthedocs.io/en/latest/interop/qemu-ga-ref.html)

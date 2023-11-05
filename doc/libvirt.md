@@ -33,8 +33,11 @@ sudo apt install libvirt-daemon virt-manager -y
 
 [build libvirt](https://developer.ibm.com/tutorials/compiling-libvirt-and-qemu/)
 
+## 常见错误
+[启动 qemu 权限错误](https://unix.stackexchange.com/questions/471345/changing-libvirt-emulator-permission-denied)
 
-一些典型的 libvirt xml
+
+# 一些典型的 libvirt xml
 ```xml
 <!-- usb cdrom -->
 <?xml version="1.0" encoding="utf-8"?>

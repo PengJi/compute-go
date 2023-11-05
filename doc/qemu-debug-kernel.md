@@ -23,6 +23,7 @@ qemu-system-x86_64 \
 -serial stdio \
 -net nic \
 -net user \
+ -net nic -net tap,ifname=tap0 \
 -s
 ```
 `-s` 在1234端口接受GDB调试
