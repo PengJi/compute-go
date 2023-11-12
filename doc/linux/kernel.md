@@ -34,13 +34,29 @@ make distclean
 # make distclean > make mrproper > make clean
 
 # 使用已有的.config，但会询问新增的配置项
+# 它会在现有的内核配置文件基础上建立一个新的配置文件，只会向用户提供有关新内核特性的问题。在新内核升级的过程中，它会非常有用，
+# 用户将现有的配置文件 .config 复制到新内核的源码中，执行 make oldconfig，此时，用户只需要回答新增特性的问题即可。
 make oldconfig
 
+# 与 make oldconfig 一样，只是额外悄悄地更新选项的依赖关系。
+make silentoldconfig
+
+# 与 make silentoldconfig 一样，但不需要手动交互，而是对新选项以其默认值进行配置。
+make olddefconfig
+
+# 基于 X Window 的一种配置方式，提供了漂亮的配置窗口，不过只能在 X Server 上运行 X 桌面应用程序时使用，它依赖于 QT。
+make xconfig
+
 # 使用默认配置，当前目录下生成一个 .config 文件
+# 按照内核中提供的默认配置文件对内核进行配置，在 intel x86——64 平台上，默认配置文件为 arch/x86/configs/x86_64_defconfig，
+# 生成的 .config 文件可以用作初始化配置，然后使用 make menuconfig 或 make xconfig 进行配置。
 make defconfig
 ```
 
 4. 配置内核
+为了确保生成的 .config 文件生成的内核是实际可以工作的（直接 make defconfig 生成的 .config 文件编译出来的内核常常不能工作），
+最佳实践是以当前使用的 config (位于目录 /boot，比如 /boot/config-5.15.0-87-generic）为基础，将它复制到 linux 目录下，
+重命名为 .config，然后通过 make olddefconfig 来更新 .config 文件，这样可以确保生成的 .config 文件是可用的。
 ```bash
 cd linux-4.19
 # 使用图像化配置模块，当前目录下生成一个 .config 文件
