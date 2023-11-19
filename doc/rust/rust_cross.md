@@ -14,6 +14,44 @@ toolchain 是交叉编译所需的"编译工具"，target 则是编译到目标�
 `rustup target add x86_64-unknown-linux-musl`（可以加 --toolchain=stable，但是默认是stable，也可以安装nightly的）【可以用 `rustup show`查看安装了哪些工具链，可以看到 `stable-x86_64-unknown-linux-gnu` 是默认的工具链】
 【注意，目前PC的话大多处理器架构都是x86_64的，如果目标运行机器不是这个架构的需要做出调整，Linux可以通过 `arch` 命令查看处理器架构，Windows通过 `systeminfo` 查看，x86_64,x64,AMD64 是同一个架构】
 
+# 在 x86_64 linux 下编译 aarch64 程序
+## 动态链接
+```bash
+sudo apt-get install gcc-aarch64-linux-gnu
+rustup target add aarch64-unknown-linux-gnu
+
+vim ~/.cargo/config
+[target.aarch64-unknown-linux-gnu]
+linker = "aarch64-linux-gnu-gcc"
+ar = "aarch64-unknown-linux-gnu-gcc"
+
+cargo build --target aarch64-unknown-linux-gnu --release
+```
+或者
+```bash
+# 需安装 docker
+cargo install -f cross
+cross build --target aarch64-unknown-linux-gnu --release
+```
+
+## 静态链接
+```bash
+rustup target add aarch64-unknown-linux-musl
+
+vim ~/.cargo/config
+[target.aarch64-unknown-linux-musl]
+linker = "aarch64-linux-gnu-gcc"
+rustflags = [ "-C", "target-feature=+crt-static", "-C", "link-arg=-lgcc" ]
+
+cargo build --target aarch64-unknown-linux-musl --release
+```
+或者
+```bash
+# 需安装 docker
+cargo install -f cross
+cross build --target aarch64-unknown-linux-musl --release
+```
+
 
 # 在 Linux 下编译 Windows 程序
 1. `rustup toolchain install stable-x86_64-pc-windows-gnu`  
