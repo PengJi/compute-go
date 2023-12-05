@@ -72,12 +72,12 @@ sudo apt install libvirt-daemon virt-manager -y
 </disk>
 ```
 
-热添加设备
+# 热添加设备
 ```bash
 virsh attach-device 01d3658c-b11c-4e87-8214-512377513b31 usb_cdrom.xml --current
 ```
 
-通过 libvirt 执行 qmp
+# 通过 libvirt 执行 qmp
 ```bash
 # 使用 qmp 热添加 cdrom
 virsh qemu-monitor-command ca4152ab-b978-4594-be4f-b41bb2532146 --pretty '{ "execute": "__com.redhat_drive_add", "arguments": { "id": "usb_cdrom_fastio_drive_id", "file":"/usr/share/smartx/images/d3420652-67a2-4121-a489-7d415039395d","media":"cdrom"}}'
@@ -92,23 +92,39 @@ virsh qemu-monitor-command ca4152ab-b978-4594-be4f-b41bb2532146 --pretty '{ "exe
 virsh qemu-monitor-command ca4152ab-b978-4594-be4f-b41bb2532146 --pretty '{ "execute": "human-monitor-command", "arguments": { "command-line": "device_del usb_cdrom_device" } }'
 ```
 
-通过 libvirt 执行 qga
+# 通过 libvirt 执行 qga
 ```bash
 # 测试虚拟机里的qemu-guest-agent是否可用
-virsh qemu-agent-command DOMAIN --pretty '{ "execute": "guest-ping" }'
+virsh qemu-agent-command ca4152ab-b978-4594-be4f-b41bb2532146 --pretty '{ "execute": "guest-ping" }'
 
 # 查看支持的qemu-guest-agent指令
-virsh qemu-agent-command DOMAIN --pretty '{ "execute": "guest-info" }'
+virsh qemu-agent-command ca4152ab-b978-4594-be4f-b41bb2532146 --pretty '{ "execute": "guest-info" }'
 
 # 获得网卡信息
-virsh qemu-agent-command DOMAIN --pretty '{ "execute": "guest-network-get-interfaces" }'
+virsh qemu-agent-command ca4152ab-b978-4594-be4f-b41bb2532146 --pretty '{ "execute": "guest-network-get-interfaces" }'
 
 # 执行命令，这是异步的，第一步会返回一个pid，假设为797，在第二步需要带上这个pid
-virsh qemu-agent-command DOMAIN --pretty '{ "execute": "guest-exec", "arguments": { "path": "ip", "arg": [ "addr", "list" ], "capture-output": true } }'
-virsh qemu-agent-command DOMAIN --pretty '{ "execute": "guest-exec-status", "arguments": { "pid": 797 } }'
+virsh qemu-agent-command ca4152ab-b978-4594-be4f-b41bb2532146 --pretty '{ "execute": "guest-exec", "arguments": { "path": "ip", "arg": [ "addr", "list" ], "capture-output": true } }'
+virsh qemu-agent-command ca4152ab-b978-4594-be4f-b41bb2532146 --pretty '{ "execute": "guest-exec-status", "arguments": { "pid": 797 } }'
 ```
 
- libvirt Python 接口
+# 管理虚拟机
+[管理虚拟机](https://docs.openeuler.org/zh/docs/20.03_LTS/docs/Virtualization/%E7%AE%A1%E7%90%86%E8%99%9A%E6%8B%9F%E6%9C%BA.html)
+
+# 其他命令
+dump
+当虚拟机状态异常时，比如无响应，可 dump 其内存状态。
+```bash
+virsh dump --memory-only --live e5fb54af-98ec-46d7-a69b-5a8fb6b52996 name.dump
+crash vmlinux name.dump
+
+# 查看任务状态
+virsh domjobinfo e5fb54af-98ec-46d7-a69b-5a8fb6b52996
+```
+[20.19. Creating a Dump File of a Guest Virtual Machine's Core Using virsh dump](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/virtualization_deployment_and_administration_guide/sect-domain_commands-creating_a_dump_file_of_a_domains_core)
+
+
+# libvirt Python 接口
  ```python
 import logging
 import traceback
