@@ -4,14 +4,14 @@
 常用命令
 ```bash
 # 构建镜像
-docker build --network=host -t ovt:test -f ovt.dockerfile .
+docker build --network=host -t ovt:debian -f ovt-debian.dockerfile .
 
 
 # 拉取镜像
 docker pull registry.smtx.io/svt/svt:debian-svt-base
 
 # 运行容器
-docker run --rm -ti --privileged --network host --name ovt -v $PWD:$PWD -w $PWD ovt:test /bin/bash
+docker run --rm -ti --privileged --network host --name ovt -v $PWD:$PWD -w $PWD ovt:debian /bin/bash
 
 
 # 进入容器，退出容器停止
