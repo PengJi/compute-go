@@ -1,4 +1,16 @@
 # qemu-ga 介绍
+# 编译
+```bash
+# x86_64
+./configure --static --disable-docs --enable-guest-agent --target-list=x86_64-softmmu
+make qemu-ga
+
+# aarch64
+./configure --static --disable-docs --enable-guest-agent --target-list=aarch64-softmmu --cross-prefix=aarch64-linux-gnu-
+make qemu-ga -j4
+```
+
+# 使用
 添加设备的 controller 
 ```xml
 <controller type='virtio-serial' index='0' ports='2'>
