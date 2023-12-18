@@ -6,7 +6,6 @@
 # 构建镜像
 docker build --network=host -t ovt:debian -f ovt-debian.dockerfile .
 
-
 # 拉取镜像
 docker pull registry.smtx.io/svt/svt:debian-svt-base
 
