@@ -101,6 +101,12 @@ git clone https://github.com/systemd/systemd
             -D link-journalctl-shared=false \
             -D link-portabled-shared=false \
             -D prefer_static=true
+
+./configure --auto-features=disabled \
+            --default-library=static \
+            -D static-libsystemd=true \
+            -D static-libudev=true \
+            -D prefer_static=true
 make -j$(nproc)
 make install
 
