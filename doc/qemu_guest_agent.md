@@ -115,15 +115,12 @@ wget https://www.tcpdump.org/release/libpcap-1.10.4.tar.gz
 tar xf libpcap-1.10.4.tar.gz
 ./configure && make
 
-# workaround
-# 1. 禁用 libudev，不支持某些命令：guest-get-disks
-# 2. 动态编译，针对每个发行版分别构建包
-
 # debian12
 ./configure --static --target-list=x86_64-softmmu \
 --enable-guest-agent \
 --disable-docs \
---disable-debug-info
+--disable-debug-info \
+--enable-cap-ng
 
 
 ./configure --static --target-list=x86_64-softmmu \
@@ -137,10 +134,7 @@ tar xf libpcap-1.10.4.tar.gz
 --enable-guest-agent \
 --disable-docs \
 --disable-debug-info \
---disable-gnutls
-
-make qemu-ga -j$(nproc)
- 
+--disable-gnutls 
 
 --enable-cap-ng \
 --enable-capstone \
@@ -316,10 +310,6 @@ make qemu-ga -j$(nproc)
 --enable-vnc-sasl \
 --enable-werror \
 --enable-xkbcommon
-make qemu-ga -j$(nproc)
-
-# aarch64
-./configure --static --disable-docs --enable-guest-agent --target-list=aarch64-softmmu --cross-prefix=aarch64-linux-gnu-
 make qemu-ga -j$(nproc)
 ```
 

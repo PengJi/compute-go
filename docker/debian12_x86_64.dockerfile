@@ -6,7 +6,6 @@ RUN sed -i 's\http://deb.debian.org/\http://mirrors.tuna.tsinghua.edu.cn/\' /etc
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -yy apt-transport-https eatmydata
 
-
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
     apt-get install -y eatmydata && \
