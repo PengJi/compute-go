@@ -3,40 +3,46 @@ FROM debian:bookworm-slim
 USER root
 
 RUN sed -i 's\http://deb.debian.org/\http://mirrors.tuna.tsinghua.edu.cn/\' /etc/apt/sources.list.d/debian.sources
-
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -yy apt-transport-https eatmydata
 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive eatmydata \
-    apt install -y --no-install-recommends gnupg dirmngr software-properties-common
-
-RUN apt install -y \
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update && \
+    eatmydata apt-get dist-upgrade -y && \
+    eatmydata apt-get install --no-install-recommends -y \
+    gnupg \
+    dirmngr \
+    software-properties-common \
     curl \
     vim \
     msitools \
     autoconf \
+    autopoint \
     automake \
     libtool \
+    meson \
     bison \
     flex \
+    bzip2 \
     git \
-    meson \
+    wget \
     gperf \
     pkg-config \
     ninja-build \
     build-essential \
     ca-certificates \
     openssl \
-    python \
-    g++-mingw-w64-x86-64-posix
+    ruby \
+    libtool-bin \
+    lzip \
+    p7zip-full \
+    libgdk-pixbuf2.0-dev \
+    intltool
 
+RUN git clone https://github.com/mxe/mxe.git && \
+    mv mxe /opt/mxe && \
+    cd /opt/mxe &&\
+    make MXE_TARGETS='x86_64-w64-mingw32.static'
 
-apt-get install \
-autoconf automake autopoint bash bison bzip2 flex gettext\
-git g++ gperf intltool libffi-dev libgdk-pixbuf2.0-dev \
-libtool libltdl-dev libssl-dev libxml-parser-perl make \
- p7zip-full patch perl pkg-config python ruby scons \
-sed unzip wget xz-utils g++-multilib libc6-dev-i386 libtool-bin
 
 # ENV TARGET x86-64
 

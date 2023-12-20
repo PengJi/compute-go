@@ -58,19 +58,35 @@ make qemu-ga -j$(nproc)
 
 build for win64
 ```bash
-docker build --network=host -t debian12:win64 -f debian12_win64.dockerfile .
-docker run -ti --privileged --network host -v $PWD:$PWD -w $PWD debian12:win64 /bin/bash
-
 docker build --network=host -t fedoar37:win64 -f fedoar37_win64.dockerfile .
 docker run -ti --privileged --network host -v $PWD:$PWD -w $PWD fedoar37:win64 /bin/bash
 
+docker build --network=host -t debian10:win64 -f debian10_win64.dockerfile .
+docker run -ti --privileged --network host -v $PWD:$PWD -w $PWD debian10:win64 /bin/bash
+
+docker build --network=host -t debian12:win64 -f debian12_win64.dockerfile .
+docker run -ti --privileged --network host -v $PWD:$PWD -w $PWD debian12:win64 /bin/bash
 
 vsssdk='vsssdk_7.2.exe'
 # curl -O http://192.168.67.2/distros/isostore/SVT/windows_install/${vsssdk}
 wget https://download.microsoft.com/download/9/4/c/94c588cf-8176-4bdb-9d55-2597c76043c6/setup.exe -O ${vsssdk}
 scripts/extract-vsssdk-headers ${vsssdk}
-./configure  --with-vss-sdk --disable-docs --enable-guest-agent --cross-prefix=x86_64-w64-mingw32.static- "--prefix=C:\\Program Files\\svt"
-make qemu-ga.exe qga/vss-win32/qga-vss.dll
+
+./configure  \
+--with-vss-sdk \
+--enable-guest-agent \
+--disable-docs \
+--cross-prefix=x86_64-w64-mingw32.static- \
+--prefix="C:\\Program Files\\svt"
+
+./configure  \
+--with-vss-sdk \
+--enable-guest-agent \
+--disable-docs \
+--host=x86_64-w64-mingw32.static \
+"--prefix=C:\\Program Files\\svt"
+
+make -j$(nproc) qemu-ga.exe qga/vss-win32/qga-vss.dll
 ```
 
 

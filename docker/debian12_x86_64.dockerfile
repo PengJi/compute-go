@@ -8,10 +8,12 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -yy apt-transport-h
 
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
-    apt-get install -y eatmydata && \
     eatmydata apt-get dist-upgrade -y && \
     eatmydata apt-get install --no-install-recommends -y \
-    autoconf automake libtool pkg-config \
+    autoconf \
+    automake \
+    libtool \
+    pkg-config \
     ninja-build \
     build-essential \
     ca-certificates \
