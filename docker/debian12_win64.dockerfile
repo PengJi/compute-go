@@ -12,8 +12,6 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     gnupg \
     dirmngr \
     software-properties-common \
-    curl \
-    vim \
     msitools \
     autoconf \
     autopoint \
@@ -23,12 +21,20 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     bison \
     flex \
     bzip2 \
+    zip \
     git \
     wget \
     gperf \
+    curl \
+    vim \
+    python3 \
+    python3-distutils \
+    python3-pkg-resources \
+    python-is-python3 \
     pkg-config \
     ninja-build \
     build-essential \
+    cmake \
     ca-certificates \
     openssl \
     ruby \
@@ -36,12 +42,30 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     lzip \
     p7zip-full \
     libgdk-pixbuf2.0-dev \
-    intltool
+    libssl-dev \
+    intltool \
+    python3-mako \
+    bash \
+    g++ \
+    g++-multilib \
+    gettext \
+    libc6-dev-i386 \
+    libgdk-pixbuf2.0-dev \
+    libltdl-dev \
+    libgl-dev \
+    libpcre3-dev \
+    libssl-dev \
+    libtool-bin \
+    libxml-parser-perl \
+    patch \
+    perl \
+    unzip \
+    xz-utils \
+    wixl
 
-RUN git clone https://github.com/mxe/mxe.git && \
-    mv mxe /opt/mxe && \
-    cd /opt/mxe &&\
-    make MXE_TARGETS='x86_64-w64-mingw32.static'
+# RUN wget https://codeload.github.com/mxe/mxe/zip/refs/heads/master -O mxe.zip && \
+#     cd /opt/mxe-master &&\
+#     make MXE_TARGETS='x86_64-w64-mingw32.static'
 
 
 # ENV TARGET x86-64

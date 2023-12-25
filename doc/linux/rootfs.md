@@ -108,3 +108,5 @@ mkfs.ext4 rootfs.ext4
 sudo mount -o loop rootfs.ext4 rootfs
 sudo cp -rf rootfs_files/* rootfs
 ```
+
+[从源码编译linux-4.9内核并运行一个最小的busybox文件系统](https://www.bilibili.com/read/cv11271232/)
