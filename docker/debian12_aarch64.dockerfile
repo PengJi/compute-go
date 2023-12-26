@@ -37,14 +37,6 @@ RUN apt update && \
     libsnappy-dev:arm64 \
     libxen-dev:arm64
 
-
-
-# RUN mv /usr/bin/gcc /usr/bin/gcc_bak && \
-#     ln -s aarch64-linux-gnu-gcc /usr/bin/gcc
-# RUN ldconfig
-
-
 RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.old && pip install Jinja2
-
 
 WORKDIR /
