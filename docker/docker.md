@@ -64,27 +64,15 @@ make qemu-ga -j$(nproc)
 
 # build for win64
 ```bash
-docker build --network=host -t fedoar37:win64 -f fedoar37_win64.dockerfile .
-docker run -ti --privileged --network host -v $PWD:$PWD -w $PWD fedoar37:win64 /bin/bash
+# docker build --network=host -t fedoar37:win64 -f fedoar37_win64.dockerfile .
+# docker run -ti --privileged --network host -v $PWD:$PWD -w $PWD fedoar37:win64 /bin/bash
 
-docker build --network=host -t debian10:win64 -f debian10_win64.dockerfile .
-docker run -ti --privileged --network host -v $PWD:$PWD -w $PWD debian10:win64 /bin/bash
+# docker build --network=host -t debian10:win64 -f debian10_win64.dockerfile .
+# docker run -ti --privileged --network host -v $PWD:$PWD -w $PWD debian10:win64 /bin/bash
 
 docker build --network=host -t debian12:win64 -f debian12_win64.dockerfile .
 docker run -ti --privileged --network host -v $PWD:$PWD -w $PWD debian12:win64 /bin/bash
 
-# build mxe
-cp qemu-elf/mex-pkg mex/pkg
-sed --in-place 's:-Dintrospection=disabled \\:-Dintrospection=disabled -Dfreetype=enabled -Dfontconfig=enabled \\:g' "src/pango.mk"
-rm src/cblas.mk src/lapack.mk src/armadillo.mk
-make cc MXE_TARGETS='x86_64-w64-mingw32.static' --jobs=8 JOBS=8 --keep-going
-make glib MXE_TARGETS='x86_64-w64-mingw32.static' --jobs=8 JOBS=8
-
-
-vsssdk='vsssdk_7.2.exe'
-# curl -O http://192.168.67.2/distros/isostore/SVT/windows_install/${vsssdk}
-wget https://download.microsoft.com/download/9/4/c/94c588cf-8176-4bdb-9d55-2597c76043c6/setup.exe -O ${vsssdk}
-scripts/extract-vsssdk-headers ${vsssdk}
 
 # 修改代码
 git cherry-pick -x 410542d4a2d7c1d8136d3e49fc3ca29fbb76789a
@@ -101,7 +89,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_STORAGEPORT,
 
 
 ./configure  \
---with-vss-sdk="/home/jipeng/vss-sdk/" \
+--with-vss-sdk="/home/jipeng/qemu-elf/" \
 --cross-prefix=x86_64-w64-mingw32.static- \
 --enable-guest-agent \
 --disable-guest-agent-msi \

@@ -63,10 +63,23 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     xz-utils \
     wixl
 
-# RUN wget https://codeload.github.com/mxe/mxe/zip/refs/heads/master -O mxe.zip && \
-#     cd /opt/mxe-master &&\
-#     make MXE_TARGETS='x86_64-w64-mingw32.static'
+# build mxe, tutorial: https://mxe.cc/#tutorial
+RUN git clone https://github.com/mxe/mxe.git /opt/mxe && \
+    cd /opt/mxe && \
+    wget -P /opt/mxe/pkg ... && \
+    make cc MXE_TARGETS='x86_64-w64-mingw32.static' --jobs=8 JOBS=8 && \
+    make glib MXE_TARGETS='x86_64-w64-mingw32.static' --jobs=8 JOBS=8
 
+ENV PATH=$PATH:/opt/mxe/usr/bin/
+
+# build vsssdk
+ENV VSSSDK='vsssdk_7.2.exe'
+RUN wget -O ${VSSSDK} https://download.microsoft.com/download/9/4/c/94c588cf-8176-4bdb-9d55-2597c76043c6/setup.exe
+RUN scripts/extract-vsssdk-headers ${VSSSDK}
+
+
+# sed --in-place 's:-Dintrospection=disabled \\:-Dintrospection=disabled -Dfreetype=enabled -Dfontconfig=enabled \\:g' "src/pango.mk"
+# rm src/cblas.mk src/lapack.mk src/armadillo.mk
 
 # ENV TARGET x86-64
 
@@ -107,3 +120,5 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 #     mkdir /tmp/qemu/build
 
 # WORKDIR /tmp/qemu
+
+WORKDIR /
