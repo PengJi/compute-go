@@ -33,7 +33,7 @@ make distclean
 
 # make distclean > make mrproper > make clean
 
-# 使用已有的.config，但会询问新增的配置项
+# 使用已有的 .config，但会询问新增的配置项
 # 它会在现有的内核配置文件基础上建立一个新的配置文件，只会向用户提供有关新内核特性的问题。在新内核升级的过程中，它会非常有用，
 # 用户将现有的配置文件 .config 复制到新内核的源码中，执行 make oldconfig，此时，用户只需要回答新增特性的问题即可。
 make oldconfig
@@ -59,7 +59,10 @@ make defconfig
 重命名为 .config，然后通过 make olddefconfig 来更新 .config 文件，这样可以确保生成的 .config 文件是可用的。
 ```bash
 cd linux-4.19
-# 使用图像化配置模块，当前目录下生成一个 .config 文件
+# 根据现有的配置文件生成新的配置文件
+cp /boot/config-5.15.0-87-generic /home/jipeng/linux/.config
+make olddefconfig
+# 或者使用图像化配置模块，当前目录下生成一个 .config 文件
 make menuconfig
 ```
 
