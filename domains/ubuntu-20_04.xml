@@ -1,5 +1,5 @@
 <domain type='kvm'>
-  <name>ubunut-20_04</name>
+  <name>ubuntu-20_04</name>
   <memory unit='KiB'>8388608</memory>
   <currentMemory unit='KiB'>8388608</currentMemory>
   <vcpu placement='static'>4</vcpu>
@@ -47,6 +47,12 @@
       <source bridge='virbr0'/>
       <model type='virtio'/>
     </interface>
+    <channel type='unix'>
+      <!-- <source mode='bind' path='/var/lib/libvirt/qemu/domain-10-ubunut-20_04/org.qemu.guest_agent.0'/> -->
+      <target type='virtio' name='org.qemu.guest_agent.0'/>
+      <alias name='channel0'/>
+      <address type='virtio-serial' controller='0' bus='0' port='1'/>
+    </channel>
     <serial type='pty'>
       <target type='isa-serial' port='0'>
         <model name='isa-serial'/>
@@ -73,4 +79,8 @@
     <memballoon model='virtio'>
     </memballoon>
   </devices>
+  <qemu:commandline>
+    <qemu:arg value='-rtc'/>
+    <qemu:arg value='driftfix=slew,clock=rt'/>
+  </qemu:commandline>
 </domain>
