@@ -1,7 +1,7 @@
 <domain type='kvm'>
   <name>windows10</name>
-  <memory unit='KiB'>8388608</memory>
-  <currentMemory unit='KiB'>8388608</currentMemory>
+  <memory unit='KiB'>6291456</memory>
+  <currentMemory unit='KiB'>6291456</currentMemory>
   <vcpu placement='static'>4</vcpu>
   <iothreads>1</iothreads>
   <os>

@@ -30,7 +30,6 @@ git clone https://github.com/systemd/systemd
 #             -D link-journalctl-shared=false \
 #             -D link-portabled-shared=false \
 #             -D prefer_static=true
-
 ./configure --auto-features=disabled \
             --default-library=static \
             -D static-libsystemd=true \
@@ -64,15 +63,8 @@ make qemu-ga -j$(nproc)
 
 # build for win64
 ```bash
-# docker build --network=host -t fedoar37:win64 -f fedoar37_win64.dockerfile .
-# docker run -ti --privileged --network host -v $PWD:$PWD -w $PWD fedoar37:win64 /bin/bash
-
-# docker build --network=host -t debian10:win64 -f debian10_win64.dockerfile .
-# docker run -ti --privileged --network host -v $PWD:$PWD -w $PWD debian10:win64 /bin/bash
-
 docker build --network=host -t debian12:win64 -f debian12_win64.dockerfile .
 docker run -ti --privileged --network host -v $PWD:$PWD -w $PWD debian12:win64 /bin/bash
-
 
 # 修改代码
 git cherry-pick -x 410542d4a2d7c1d8136d3e49fc3ca29fbb76789a
@@ -98,6 +90,8 @@ DEFINE_GUID(GUID_DEVINTERFACE_STORAGEPORT,
 --disable-werror
 
 make -j$(nproc) qemu-ga qga/vss-win32/qga-vss.dll
+
+scp -T build/qga/qemu-ga.exe smtxauto@192.168.31.37:'C:\program files\svt\qemu-ga'
 ```
 
 
