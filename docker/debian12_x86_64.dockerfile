@@ -45,4 +45,14 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 
 RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.old && pip install Jinja2
 
+# build systemd for static library of libudev
+RUN git clone https://github.com/systemd/systemd /opt/systemd && \
+    ./configure \
+    --auto-features=disabled \
+    --default-library=static \
+    -D static-libsystemd=true \
+    -D static-libudev=true && \
+    make -j$(nproc) && \
+    make install
+
 WORKDIR /
