@@ -20,9 +20,17 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     bison \
     flex \
     git \
+    curl \
     meson \
     gperf \
+    gettext-base \
+    psmisc \
+    texinfo \
+    makeself \
+    genisoimage \
+    xorriso \
     python3-pip \
+    # selinux-policy-dev \
     libglib2.0-dev \
     libmspack-dev \
     libpam0g-dev \
@@ -47,6 +55,7 @@ RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MAN
 
 # build systemd for static library of libudev
 RUN git clone https://github.com/systemd/systemd /opt/systemd && \
+    cd /opt/systemd && \
     ./configure \
     --auto-features=disabled \
     --default-library=static \
@@ -54,5 +63,8 @@ RUN git clone https://github.com/systemd/systemd /opt/systemd && \
     -D static-libudev=true && \
     make -j$(nproc) && \
     make install
+
+RUN mkdir /tmp/qemu && \
+    mkdir /tmp/qemu/build
 
 WORKDIR /tmp/qemu

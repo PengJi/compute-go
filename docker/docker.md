@@ -13,7 +13,6 @@ docker pull registry.smtx.io/svt/svt:debian-svt-base
 # build for x86_64
 ```bash
 docker build --network=host -t debian12:x86_64 -f debian12_x86_64.dockerfile .
-# docker run -ti --privileged --network host --name ovt -v $PWD:$PWD -w $PWD debian12:x86_64 /bin/bash
 docker run -ti --privileged --network host -v $PWD:$PWD -w $PWD debian12:x86_64 /bin/bash
 
 # build qemu-ga
