@@ -55,4 +55,4 @@ RUN git clone https://github.com/systemd/systemd /opt/systemd && \
     make -j$(nproc) && \
     make install
 
-WORKDIR /
+WORKDIR /tmp/qemu

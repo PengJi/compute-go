@@ -39,4 +39,4 @@ RUN apt update && \
 
 RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.old && pip install Jinja2
 
-WORKDIR /
+WORKDIR /tmp/qemu

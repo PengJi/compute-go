@@ -97,4 +97,4 @@ ENV VSSSDK='vsssdk_7.2.exe'
 RUN wget -O ${VSSSDK} https://download.microsoft.com/download/9/4/c/94c588cf-8176-4bdb-9d55-2597c76043c6/setup.exe && \
     scripts/extract-vsssdk-headers ${VSSSDK}
 
-WORKDIR /
+WORKDIR /tmp/qemu
