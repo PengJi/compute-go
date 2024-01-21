@@ -18,9 +18,10 @@ tar xvJf qemu-7.0.0.tar.xz
 # 编译安装并配置 RISC-V 支持，安装在特定位置
 cd qemu-7.0.0
 ./configure \
---prefix=$HOME/qemu_build \
+--prefix=/usr \
 --target-list=riscv64-softmmu,riscv64-linux-user,x86_64-softmmu,x86_64-linux-user \
 --enable-sdl  # 支持图形界面
+# 上述 prefix 也可为： --prefix=$HOME/qemu_build \
 # Install prefix               : /usr/local
 # BIOS directory               : share/qemu
 # firmware path                : /usr/local/share/qemu-firmware
@@ -54,7 +55,8 @@ qemu-system-x86_64 --version
 qemu-x86_64 --version
 ```
 
-上述将 qemu 安装在了 $HOME/qemu_build 目录下，如果要使用 libvirt，需要安装到 `/usr`，指定 `--prefix=/usr`，libvirt 也默认安装在 `/usr`，
+上述将 qemu 安装在了 $HOME/qemu_build 目录下，如果要使用 libvirt，需要安装到 `/usr`，指定 `--prefix=/usr`，libvirt 也默认安装在 `/usr`
+
 具体的安装位置：
 ```bash
 Installing subprojects/dtc/libfdt/libfdt.a to /usr/lib/x86_64-linux-gnu
