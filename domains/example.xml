@@ -1,0 +1,246 @@
+<domain type='kvm' id='86' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+  <name>9a46f52c-6caa-4630-9621-5d9ed6f0f333</name>
+  <uuid>61ccfcd5-d8fb-4eb1-83d0-66da9e0f1aa2</uuid>
+  <description>SmartX</description>
+  <maxMemory slots='255' unit='KiB'>4194304000</maxMemory>
+  <memory unit='KiB'>4194304</memory>
+  <currentMemory unit='KiB'>4194304</currentMemory>
+  <vcpu placement='static' current='4'>240</vcpu>
+  <resource>
+    <partition>/machine</partition>
+  </resource>
+  <sysinfo type='smbios'>
+    <system>
+      <entry name='manufacturer'>SmartX</entry>
+      <entry name='product'>SMTX OS</entry>
+      <entry name='version'>1.0</entry>
+      <entry name='serial'>SmartX-2cf5469aaa6c3046-96215d9ed6f0f333</entry>
+    </system>
+  </sysinfo>
+  <os>
+    <type arch='x86_64' machine='pc-i440fx-rhel7.6.0'>hvm</type>
+    <bootmenu enable='yes'/>
+    <smbios mode='sysinfo'/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+  </features>
+  <cpu mode='custom' match='exact' check='full'>
+    <model fallback='forbid'>Broadwell</model>
+    <topology sockets='240' cores='1' threads='1'/>
+    <feature policy='require' name='vme'/>
+    <feature policy='require' name='f16c'/>
+    <feature policy='require' name='rdrand'/>
+    <feature policy='require' name='hypervisor'/>
+    <feature policy='require' name='arat'/>
+    <feature policy='require' name='xsaveopt'/>
+    <feature policy='require' name='abm'/>
+    <numa>
+      <cell id='0' cpus='0-239' memory='4194304' unit='KiB'/>
+    </numa>
+  </cpu>
+  <clock offset='utc'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <emulator>/usr/libexec/qemu-kvm</emulator>
+    <disk type='network' device='disk'>
+      <driver name='qemu' type='raw' cache='none' io='native'/>
+      <source protocol='iscsi' name='iqn.2016-02.com.smartx:system:zbs-iscsi-datastore-1622698719026l/245'>
+        <host name='127.0.0.1' port='3260'/>
+        <initiator>
+          <iqn name='iqn.2013-11.org.smartx:9a46f52c-6caa-4630-9621-5d9ed6f0f333.665af6b4-beb5-11eb-87dc-52540084d061.0'/>
+        </initiator>
+      </source>
+      <target dev='vda' bus='virtio'/>
+      <serial>5e559355-32e1-3298-9154-ce395b77e878</serial>
+      <boot order='1'/>
+      <alias name='virtio-disk0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x0a' function='0x0'/>
+    </disk>
+    <disk type='network' device='disk'>
+      <driver name='qemu' type='raw' cache='none' io='native'/>
+      <source protocol='iscsi' name='iqn.2016-02.com.smartx:system:zbs-iscsi-datastore-1669263461714s/75'>
+        <host name='127.0.0.1' port='3260'/>
+        <initiator>
+          <iqn name='iqn.2013-11.org.smartx:9a46f52c-6caa-4630-9621-5d9ed6f0f333.665af6b4-beb5-11eb-87dc-52540084d061.0'/>
+        </initiator>
+      </source>
+      <target dev='vdb' bus='virtio'/>
+      <serial>020c22fd-9ff8-3e03-a426-b14b3b2f0884</serial>
+      <boot order='3'/>
+      <alias name='virtio-disk1'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x0b' function='0x0'/>
+    </disk>
+    <disk type='network' device='disk'>
+      <driver name='qemu' type='raw' cache='none' io='native'/>
+      <source protocol='iscsi' name='iqn.2016-02.com.smartx:system:zbs-iscsi-datastore-1622698719026l/173'>
+        <host name='127.0.0.1' port='3260'/>
+        <initiator>
+          <iqn name='iqn.2013-11.org.smartx:9a46f52c-6caa-4630-9621-5d9ed6f0f333.665af6b4-beb5-11eb-87dc-52540084d061.0'/>
+        </initiator>
+      </source>
+      <target dev='vdc' bus='virtio'/>
+      <serial>6c095d1b-cd8d-3def-a0a0-dc7d842ad7d1</serial>
+      <boot order='5'/>
+      <alias name='virtio-disk2'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x0c' function='0x0'/>
+    </disk>
+    <disk type='file' device='cdrom'>
+      <driver name='qemu' type='raw'/>
+      <source file='/usr/share/smartx/images/afe08e47-f8f7-4096-a38a-02e72c2b447e'/>
+      <backingStore/>
+      <target dev='hda' bus='ide'/>
+      <readonly/>
+      <boot order='2'/>
+      <alias name='ide0-0-0'/>
+      <address type='drive' controller='0' bus='0' target='0' unit='0'/>
+    </disk>
+    <disk type='network' device='disk'>
+      <driver name='qemu' type='raw' cache='none' io='native'/>
+      <source protocol='iscsi' name='iqn.2016-02.com.smartx:system:zbs-iscsi-datastore-1669270245370j/75'>
+        <host name='127.0.0.1' port='3260'/>
+        <initiator>
+          <iqn name='iqn.2013-11.org.smartx:9a46f52c-6caa-4630-9621-5d9ed6f0f333.665af6b4-beb5-11eb-87dc-52540084d061.0'/>
+        </initiator>
+      </source>
+      <target dev='sda' bus='scsi'/>
+      <serial>5271e8f7-a709-3e7f-925b-0a4999c79c4c</serial>
+      <wwn>24da007f7f2de0f9</wwn>
+      <vendor>SmartX</vendor>
+      <product>SMTX OS</product>
+      <boot order='4'/>
+      <alias name='scsi0-0-0-0'/>
+      <address type='drive' controller='0' bus='0' target='0' unit='0'/>
+    </disk>
+    <disk type='network' device='disk'>
+      <driver name='qemu' type='raw' cache='none' io='native'/>
+      <source protocol='iscsi' name='iqn.2016-02.com.smartx:system:zbs-iscsi-datastore-1669270209009a/128'>
+        <host name='127.0.0.1' port='3260'/>
+        <initiator>
+          <iqn name='iqn.2013-11.org.smartx:9a46f52c-6caa-4630-9621-5d9ed6f0f333.665af6b4-beb5-11eb-87dc-52540084d061.0'/>
+        </initiator>
+      </source>
+      <target dev='sdb' bus='scsi'/>
+      <serial>8e4f54da-7cc2-31fc-a932-dc417b49f93d</serial>
+      <wwn>24d8007f7f5e50d2</wwn>
+      <vendor>SmartX</vendor>
+      <product>SMTX OS</product>
+      <boot order='6'/>
+      <alias name='scsi0-0-0-1'/>
+      <address type='drive' controller='0' bus='0' target='0' unit='1'/>
+    </disk>
+    <controller type='usb' index='0' model='piix3-uhci'>
+      <alias name='usb'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x2'/>
+    </controller>
+    <controller type='usb' index='1' model='nec-xhci' ports='15'>
+      <alias name='usb1'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x0'/>
+    </controller>
+    <controller type='usb' index='2' model='ehci'>
+      <alias name='usb2'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x06' function='0x0'/>
+    </controller>
+    <controller type='usb' index='3' model='piix3-uhci'>
+      <alias name='usb3'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0'/>
+    </controller>
+    <controller type='virtio-serial' index='0' ports='2'>
+      <alias name='virtio-serial0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x08' function='0x0'/>
+    </controller>
+    <controller type='pci' index='1' model='pci-bridge'>
+      <model name='pci-bridge'/>
+      <target chassisNr='1'/>
+      <alias name='pci.1'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/>
+    </controller>
+    <controller type='scsi' index='0' model='virtio-scsi'>
+      <alias name='scsi0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x09' function='0x0'/>
+    </controller>
+    <controller type='pci' index='0' model='pci-root'>
+      <alias name='pci.0'/>
+    </controller>
+    <controller type='ide' index='0'>
+      <alias name='ide'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x1'/>
+    </controller>
+    <interface type='bridge'>
+      <mac address='52:54:00:02:4c:1c'/>
+      <source bridge='ovsbr-mgt'/>
+      <vlan>
+        <tag id='0'/>
+      </vlan>
+      <virtualport type='openvswitch'>
+        <parameters interfaceid='031a8367-b6f2-4d3c-b787-8d644e63eccd' profileid='c8a1e42d-e0f3-4d50-a190-53209a98f157'/>
+      </virtualport>
+      <target dev='vnet172'/>
+      <model type='virtio'/>
+      <driver name='vhost' queues='4' rx_queue_size='1024'/>
+      <link state='up'/>
+      <alias name='net0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/>
+    </interface>
+    <serial type='pty'>
+      <source path='/dev/pts/8'/>
+      <target type='isa-serial' port='1'>
+        <model name='isa-serial'/>
+      </target>
+      <alias name='serial0'/>
+    </serial>
+    <serial type='file'>
+      <source path='/usr/share/smartx/vm/serial/9a46f52c-6caa-4630-9621-5d9ed6f0f333.log'/>
+      <target type='isa-serial' port='0'>
+        <model name='isa-serial'/>
+      </target>
+      <alias name='serial1'/>
+    </serial>
+    <console type='pty'>
+      <source path='/dev/pts/8'/>
+      <target type='serial' port='1'/>
+      <alias name='serial0'/>
+    </console>
+    <channel type='unix'>
+      <source mode='bind' path='/var/lib/libvirt/qemu/channel/target/domain-86-9a46f52c-6caa-4630-9/org.qemu.guest_agent.0'/>
+      <target type='virtio' name='org.qemu.guest_agent.0' state='connected'/>
+      <alias name='channel0'/>
+      <address type='virtio-serial' controller='0' bus='0' port='1'/>
+    </channel>
+    <input type='mouse' bus='ps2'>
+      <alias name='input0'/>
+    </input>
+    <input type='tablet' bus='usb'>
+      <alias name='input1'/>
+      <address type='usb' bus='0' port='1'/>
+    </input>
+    <input type='keyboard' bus='ps2'>
+      <alias name='input2'/>
+    </input>
+    <graphics type='vnc' port='5910' autoport='yes' listen='127.0.0.1'>
+      <listen type='address' address='127.0.0.1'/>
+    </graphics>
+    <video>
+      <model type='cirrus' vram='16384' heads='1' primary='yes'/>
+      <alias name='video0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x0'/>
+    </video>
+    <memballoon model='virtio'>
+      <stats period='10'/>
+      <alias name='balloon0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x0d' function='0x0'/>
+    </memballoon>
+  </devices>
+  <seclabel type='dynamic' model='dac' relabel='yes'>
+    <label>+107:+107</label>
+    <imagelabel>+107:+107</imagelabel>
+  </seclabel>
+  <qemu:commandline>
+    <qemu:arg value='-rtc'/>
+    <qemu:arg value='driftfix=slew,clock=rt'/>
+  </qemu:commandline>
+</domain>
