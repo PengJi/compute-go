@@ -139,38 +139,6 @@ static inline void print_pa_check(unsigned long vaddr) {
 }
 
 /* page table walker functions */
-void dump_pgd(pgd_t *pgtable, int level);
-
-void dump_pud(pud_t *pgtable, int level);
-
-void dump_pmd(pmd_t *pgtable, int level);
-
-void dump_pte(pte_t *pgtable, int level);
-
-int init_module(void) {
-    volatile unsigned long *ptr;
-    int i;
-
-    ptr = kmalloc(sizeof(int), GFP_KERNEL);
-    for (i = 0; i < 1; ++i)
-      ptr[i] = i*i;
-    *ptr = 1772333;
-    printk("Value at GVA: %lu", ++*ptr);
-
-    print_ptr_vaddr(ptr);
-    dump_pgd(current->mm->pgd, 1);
-    print_pa_check(vaddr);
-
-    kvm_hypercall1(22, paddr);
-    for (i = 0; i < 1; ++i)
-      ptr[i] = ptr[i] - 1;
-    kfree((const void *) ptr);
-
-    return 0;
-}
-
-void cleanup_module(void) {}
-
 void dump_pgd(pgd_t *pgtable, int level) {
     unsigned long i;
     pgd_t pgd;
@@ -257,3 +225,27 @@ void dump_pte(pte_t *pgtable, int level) {
         }
     }
 }
+
+int init_module(void) {
+    volatile unsigned long *ptr;
+    int i;
+
+    ptr = kmalloc(sizeof(int), GFP_KERNEL);
+    for (i = 0; i < 1; ++i)
+      ptr[i] = i*i;
+    *ptr = 1772333;
+    printk("Value at GVA: %lu", ++*ptr);
+
+    print_ptr_vaddr(ptr);
+    dump_pgd(current->mm->pgd, 1);
+    print_pa_check(vaddr);
+
+    kvm_hypercall1(22, paddr);
+    for (i = 0; i < 1; ++i)
+      ptr[i] = ptr[i] - 1;
+    kfree((const void *) ptr);
+
+    return 0;
+}
+
+void cleanup_module(void) {}
