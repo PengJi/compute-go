@@ -1,18 +1,19 @@
+#include <linux/module.h>
+#include <linux/fs.h>
+#include <linux/cdev.h>
+#include <linux/uaccess.h>
 #include <linux/cpu.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/mm.h>
-#include <linux/module.h>
 #include <linux/sched.h>
 #include <linux/slab.h>
 #include <linux/sort.h>
 #include <linux/string.h>
-
 #include <asm/pgtable.h>
-#include <asm/uaccess.h>
 #include <asm/kvm_para.h>
 
-MODULE_LICENSE("GPL");
+#define DEVICE_NAME "exampledev"
 
 /* convert to 0, 0, 1, 0, 1, 1, 0, ... */
 
@@ -38,7 +39,6 @@ MODULE_LICENSE("GPL");
   UL_TO_PTE_INDEX((ulong) >> 39), UL_TO_PTE_INDEX((ulong) >> 30), \
   UL_TO_PTE_INDEX((ulong) >> 21), UL_TO_PTE_INDEX((ulong) >> 12), \
   UL_TO_PTE_OFFSET((ulong))
-
 
 // convert unsigned long to pte
 #define UL_TO_PTE_PHYADDR(ulong) \
@@ -73,7 +73,6 @@ MODULE_LICENSE("GPL");
   PTE_INDEX_PATTERN PTE_INDEX_PATTERN \
   VADDR_OFFSET_PATTERN
 
-
 // convert unsigned long to pte
 // 40 bits
 #define PTE_PHYADDR_PATTREN \
@@ -92,16 +91,11 @@ MODULE_LICENSE("GPL");
 #define PADDR_PATTERN \
   PTE_PHYADDR_PATTREN VADDR_OFFSET_PATTERN
 
-static inline void pr_sep(void) {
-    // pr_err(" ...........................................................................\n");
-    pr_err("\n");
-}
-
-/* static vals */
 unsigned long vaddr, paddr, pgd_idx, pud_idx, pmd_idx, pte_idx;
 const char *PREFIXES[] = {"PGD", "PUD", "PMD", "PTE"};
+static dev_t dev_num;
+static struct cdev example_cdev;
 
-/* static inline functions */
 static inline void pr_pte(unsigned long address, unsigned long pte,
                           unsigned long i, int level) {
     if (level == 1)
@@ -110,7 +104,7 @@ static inline void pr_pte(unsigned long address, unsigned long pte,
         pr_cont(" NEXT_LVL_GPA(%s)  =  ", PREFIXES[level - 2]);
     pr_cont(PTE_PHYADDR_PATTREN, UL_TO_PTE_PHYADDR(address >> PAGE_SHIFT));
     pr_cont(" +  8 * %-3lu\n", i);
-    pr_sep();
+    pr_err("\n");
 
     pr_cont(" %-3lu: %s " PTE_PATTERN"\n", i, PREFIXES[level - 1], UL_TO_PTE(pte));
 }
@@ -138,26 +132,39 @@ static inline void print_pa_check(unsigned long vaddr) {
     pr_info(" GPA            =      " PADDR_PATTERN "\n", UL_TO_PADDR(paddr));
 }
 
-/* page table walker functions */
-void dump_pgd(pgd_t *pgtable, int level) {
+void dump_pte(pte_t *pgtable, int level) {
     unsigned long i;
-    pgd_t pgd;
-    pr_sep();
+    pte_t pte;
 
+    for (i = 0; i < PTRS_PER_PTE; i++) {
+        pte = pgtable[i];
 
-    for (i = 0; i < PTRS_PER_PGD; i++) {
-        pgd = pgtable[i];
+        if (pte_val(pte)) {
+            if (pte_present(pte)) {
+                if (i == pte_idx)
+                    pr_pte(__pa(pgtable), pte_val(pte), i, level);
+            }
+        }
+    }
+}
 
-        if (pgd_val(pgd)) {
-            if (i == pgd_idx) {
-                if (pgd_large(pgd)) {
-                    pr_info("Large pgd detected! return"); break;
+void dump_pmd(pmd_t *pgtable, int level) {
+    unsigned long i;
+    pmd_t pmd;
+
+    for (i = 0; i < PTRS_PER_PMD; i++) {
+        pmd = pgtable[i];
+
+        if (pmd_val(pmd)) {
+            if (i == pmd_idx) {
+
+                if (pmd_large(pmd)) {
+                    pr_info("Large pmd detected! return"); break;
                 }
-                if (pgd_present(pgd)) {
+                if (pmd_present(pmd) && !pmd_large(pmd)) {
+                    pr_pte(__pa(pgtable), pmd_val(pmd), i, level);
 
-                    pr_pte(__pa(pgtable), pgd_val(pgd), i, level);
-
-                    dump_pud((pud_t *) pgd_page_vaddr(pgd), level + 1);
+                    dump_pte((pte_t *) pmd_page_vaddr(pmd), level + 1);
                 }
             }
         }
@@ -187,46 +194,40 @@ void dump_pud(pud_t *pgtable, int level) {
     }
 }
 
-void dump_pmd(pmd_t *pgtable, int level) {
+void dump_pgd(pgd_t *pgtable, int level) {
     unsigned long i;
-    pmd_t pmd;
+    pgd_t pgd;
+    pr_err("\n");
 
-    for (i = 0; i < PTRS_PER_PMD; i++) {
-        pmd = pgtable[i];
+    for (i = 0; i < PTRS_PER_PGD; i++) {
+        pgd = pgtable[i];
 
-        if (pmd_val(pmd)) {
-            if (i == pmd_idx) {
-
-                if (pmd_large(pmd)) {
-                    pr_info("Large pmd detected! return"); break;
+        if (pgd_val(pgd)) {
+            if (i == pgd_idx) {
+                if (pgd_large(pgd)) {
+                    pr_info("Large pgd detected! return"); break;
                 }
-                if (pmd_present(pmd) && !pmd_large(pmd)) {
-                    pr_pte(__pa(pgtable), pmd_val(pmd), i, level);
+                if (pgd_present(pgd)) {
 
-                    dump_pte((pte_t *) pmd_page_vaddr(pmd), level + 1);
+                    pr_pte(__pa(pgtable), pgd_val(pgd), i, level);
+
+                    dump_pud((pud_t *) pgd_page_vaddr(pgd), level + 1);
                 }
             }
         }
     }
 }
 
-void dump_pte(pte_t *pgtable, int level) {
-    unsigned long i;
-    pte_t pte;
-
-    for (i = 0; i < PTRS_PER_PTE; i++) {
-        pte = pgtable[i];
-
-        if (pte_val(pte)) {
-            if (pte_present(pte)) {
-                if (i == pte_idx)
-                    pr_pte(__pa(pgtable), pte_val(pte), i, level);
-            }
-        }
-    }
+static int device_open(struct inode *inode, struct file *file) {
+    printk(KERN_INFO "exampledev opened\n");
+    return 0;
 }
 
-int init_module(void) {
+static ssize_t device_read(struct file *file, char __user *buffer, size_t length, loff_t *offset) {
+    return 0;
+}
+
+static ssize_t device_write(struct file *file, const char __user *buffer, size_t length, loff_t *offset) {
     volatile unsigned long *ptr;
     int i;
 
@@ -248,4 +249,47 @@ int init_module(void) {
     return 0;
 }
 
-void cleanup_module(void) {}
+static int device_release(struct inode *inode, struct file *file) {
+    printk(KERN_INFO "exampledev closed\n");
+    return 0;
+}
+
+static struct file_operations fops = {
+    .owner = THIS_MODULE,
+    .read = device_read,
+    .write = device_write,
+    .open = device_open,
+    .release = device_release,
+};
+
+static int __init example_init(void) {
+    int ret;
+
+    ret = alloc_chrdev_region(&dev_num, 0, 1, DEVICE_NAME);
+    if (ret < 0) {
+        printk(KERN_ALERT "Unable to allocate major number\n");
+        return ret;
+    }
+
+    cdev_init(&example_cdev, &fops);
+    ret = cdev_add(&example_cdev, dev_num, 1);
+    if (ret < 0) {
+        unregister_chrdev_region(dev_num, 1);
+        printk(KERN_ALERT "Unable to add cdev\n");
+        return ret;
+    }
+
+    printk(KERN_INFO "exampledev module loaded with device number %d\n", MAJOR(dev_num));
+    return 0;
+}
+
+static void __exit example_exit(void) {
+    cdev_del(&example_cdev);
+    unregister_chrdev_region(dev_num, 1);
+    printk(KERN_INFO "exampledev module unloaded\n");
+}
+
+module_init(example_init);
+module_exit(example_exit);
+
+MODULE_LICENSE("GPL");

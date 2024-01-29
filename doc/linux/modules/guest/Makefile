@@ -1,4 +1,4 @@
-obj-m := gpt-dump.o
+obj-m := gpt_dump.o
 PWD := $(shell pwd)
 KDIR := /lib/modules/$(shell uname -r)/build
 
