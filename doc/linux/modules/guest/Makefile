@@ -1,4 +1,4 @@
-obj-m := gpt_dump.o
+obj-m := guestping.o
 PWD := $(shell pwd)
 KDIR := /lib/modules/$(shell uname -r)/build
 

@@ -52,7 +52,6 @@ static const struct file_operations my_fops = {
     .owner = THIS_MODULE,
     .mmap = my_mmap,
     .read = device_read,
-    // 其他文件操作...
 };
 
 static int __init my_module_init(void) {
@@ -70,9 +69,11 @@ static int __init my_module_init(void) {
     printk(KERN_INFO "my_shared_mem module loaded with device number %d\n", MAJOR(dev_num));
 
     shared_memory = vmalloc_user(shared_memory_size);
-    printk("module_a: shared memory allocated");
+    printk("module_shared: shared memory allocated");
     // 使用新的函数写入初始数据
-    write_to_shared_memory("Hello from kernel!", strlen("Hello from kernel!"));
+    
+    const char *ss = "Hello from kernel!";
+    write_to_shared_memory(ss, strlen(ss));
     return 0;
 }
 
