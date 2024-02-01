@@ -119,7 +119,7 @@ static inline void print_va(volatile unsigned long *ptr) {
     pmd_idx = (vaddr >> 21) & mask;  // PMD
     pte_idx = (vaddr >> 12) & mask;  // PTE
 
-    pr_info("idx %lu       %lu       %lu       %lu", pgd_idx, pud_idx, pmd_idx, pte_idx);
+    // pr_info("idx %lu       %lu       %lu       %lu", pgd_idx, pud_idx, pmd_idx, pte_idx);
     pr_info("GVA [PGD IDX] [PUD IDX] [PMD IDX] [PTE IDX] [  Offset  ]");
     pr_info("GVA "VADDR_PATTERN"\n", UL_TO_VADDR(vaddr));
 }
