@@ -21,6 +21,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     flex \
     git \
     curl \
+    wget \
     meson \
     gperf \
     gettext-base \
@@ -29,8 +30,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     makeself \
     genisoimage \
     xorriso \
-    python3-pip \
-    # selinux-policy-dev \
+    python3-jinja2 \
     libglib2.0-dev \
     libmspack-dev \
     libpam0g-dev \
@@ -51,20 +51,6 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     libcap-dev \
     libcap-ng-dev
 
-RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.old && pip install Jinja2
-
-# build systemd for static library of libudev
-RUN git clone https://github.com/systemd/systemd /opt/systemd && \
-    cd /opt/systemd && \
-    ./configure \
-    --auto-features=disabled \
-    --default-library=static \
-    -D static-libsystemd=true \
-    -D static-libudev=true && \
-    make -j$(nproc) && \
-    make install
-
-RUN mkdir /tmp/qemu && \
-    mkdir /tmp/qemu/build
+RUN mkdir /tmp/qemu
 
 WORKDIR /tmp/qemu
