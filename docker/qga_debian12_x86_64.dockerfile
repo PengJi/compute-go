@@ -31,6 +31,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     genisoimage \
     xorriso \
     python3-jinja2 \
+    # selinux-policy-dev \
     libglib2.0-dev \
     libmspack-dev \
     libpam0g-dev \
@@ -52,10 +53,9 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     libcap-ng-dev
 
 # build systemd for static library of libudev
-ARG SYSTEMD=systemd-255
-RUN wget -P /opt/ http://192.168.17.20/repo/pub/smartxos/iso/vmtools/build_assets/${SYSTEMD}.tar.gz &&\
-    tar -xf /opt/${SYSTEMD}.tar.gz -C /opt/ &&\
-    cd /opt/${SYSTEMD} &&\
+RUN wget -P /opt/ http://192.168.17.20/repo/pub/smartxos/iso/vmtools/build_assets/systemd-255.tar.gz &&\
+    tar -xf /opt/systemd-255.tar.gz -C /opt/ &&\
+    cd /opt/systemd-255 &&\
     ./configure \
     --buildtype=release \
     --auto-features=disabled \

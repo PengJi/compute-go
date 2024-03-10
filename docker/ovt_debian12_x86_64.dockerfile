@@ -49,7 +49,8 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     libudev-dev \
     libunistring-dev \
     libcap-dev \
-    libcap-ng-dev
+    libcap-ng-dev \
+    libgdk-pixbuf-xlib-2.0-dev
 
 RUN mkdir /tmp/qemu
 

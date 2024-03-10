@@ -66,14 +66,13 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     wixl
 
 # build mxe, tutorial: https://mxe.cc/#tutorial
-ARG MXE=mxe-build-2022-04-09
-RUN wget -P /opt/ http://192.168.17.20/repo/pub/smartxos/iso/vmtools/build_assets/${MXE}.tar.gz &&\
-    tar -xf /opt/${MXE}.tar.gz -C /opt/ &&\
-    cd /opt/${MXE} && mkdir pkg &&\
-    make cc MXE_TARGETS='x86_64-w64-mingw32.static' --jobs=2 &&\
-    make glib MXE_TARGETS='x86_64-w64-mingw32.static' --jobs=2
+RUN wget -P /opt/ http://192.168.17.20/repo/pub/smartxos/iso/vmtools/build_assets/mxe-build-2022-04-09.tar.gz &&\
+    tar -xf /opt/mxe-build-2022-04-09.tar.gz -C /opt/ &&\
+    cd /opt/mxe-build-2022-04-09 && mkdir pkg && \
+    make cc MXE_TARGETS='x86_64-w64-mingw32.static' --jobs=10 JOBS=10 && \
+    make glib MXE_TARGETS='x86_64-w64-mingw32.static' --jobs=10 JOBS=10
 
-ENV PATH=$PATH:/opt/${MXE}/usr/bin/
+ENV PATH=$PATH:/opt/mxe-build-2022-04-09/usr/bin/
 
 RUN mkdir /tmp/qemu
 
