@@ -30,4 +30,3 @@ Virtiofs 支持 DAX 技术，它允许客户机直接访问主机的内存，从
 [virtio-fs: A Shared File System for Virtual Machines slide](https://static.sched.com/hosted_files/kvmforum2019/ff/virtio-fs_%20A%20Shared%20File%20System%20for%20Virtual%20Machines.pdf)  
 [virtio-fs: A Shared File System for Virtual Machines video](https://www.youtube.com/watch?v=969sXbNX01U)  
 [Towards High-availability for Virtio-fs slide](https://static.sched.com/hosted_files/kvmforum2021/58/virtiofs_ha_jiachen.pdf)  
-

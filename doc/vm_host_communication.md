@@ -3,10 +3,11 @@ host -> guest
 ```bash
 # 使用 qga 命令
 virsh qemu-agent-command 0aebbf26-408b-40c7-b019-72c2a9fa1d48 --pretty '{"execute": "guest-ping"}'
-# 或向 socket 写入数据
+# 或
+# 向 socket 写入数据
 echo "Your message" | nc -U /var/lib/libvirt/qemu/channel/target/domain-3-ubuntu-20_04/org.qemu.guest_agent.0
 
-# 从设备读取数据
+# 从设备读数据
 exec 3</dev/vport1p1
 read -r data <&3
 echo $data
@@ -15,7 +16,7 @@ exec 3>&-
 
 guest -> host
 ```bash
-# 向设备读数据
+# 向设备写数据
 exec 3>/dev/vport1p1
 echo "Your data" >&3
 exec 3>&-

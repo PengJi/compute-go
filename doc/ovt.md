@@ -74,6 +74,7 @@ RUN mkdir /tmp/qemu
 WORKDIR /tmp/qemu
 
 ```
+
 ```bash
 autoreconf -i
 ./configure
