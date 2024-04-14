@@ -274,11 +274,11 @@ qemu-system-x86_64 \
 -device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x9,drive=disk0,id=virtio-disk0,bootindex=1,write-cache=on \
 -drive file=/home/jipeng/Downloads/openEuler-22.03-LTS-x86_64-dvd.iso,file.locking=off,format=raw,if=none,id=drive-ide0-0-0,readonly=on \
 -device ide-cd,bus=ide.0,unit=0,drive=drive-ide0-0-0,id=ide0-0-0,bootindex=2 \
--vnc 127.0.0.1:67 \
+-vnc 0.0.0.0:1 \
 -monitor stdio 
 ```
 
-`-vnc`           指定 vnc 地址和端口，可使用 vnc viewer 连接，比如：192.168.74.83:5905
+`-vnc`           指定 vnc 地址和端口，可使用 vnc viewer 连接，比如：192.168.74.83:5901
 `-monitor stdio` 在启动 qemu 之后，进入交互式命令行，可执行 hmp 命令
   
 
