@@ -1,3 +1,6 @@
+ftrace 用于分析和监测内核中发生的各种事件和函数调用。
+
+
 ```bash
 #!/usr/bin/env bash
 set -E -e -u -o pipefail
