@@ -6,10 +6,11 @@
 
 #define DEVICE_NAME "my_shared_mem"
 
+static int major;
 static dev_t dev_num;
 static struct cdev my_cdev;
 static char *shared_memory;
-static const int shared_memory_size = PAGE_SIZE;  // allocate one page for shared memory
+static const int shared_memory_size = PAGE_SIZE;
 
 void write_to_shared_memory(const char *data, size_t size) {
     if (size > shared_memory_size) {
@@ -18,11 +19,13 @@ void write_to_shared_memory(const char *data, size_t size) {
     memcpy(shared_memory, data, size);
     printk("shared memory data: %s\n", shared_memory);
 }
+
 EXPORT_SYMBOL(write_to_shared_memory);
 
 static int my_mmap(struct file *file, struct vm_area_struct *vma) {
     return remap_vmalloc_range(vma, shared_memory, 0);
 }
+
 
 static ssize_t device_read(struct file *filp, char __user *buffer, size_t length, loff_t *offset) {
     int bytes_read = 0;
@@ -32,7 +35,6 @@ static ssize_t device_read(struct file *filp, char __user *buffer, size_t length
         return 0;
     }
 
-    // copy data from kernel to user memory
     while (length && *offset < shared_memory_size) {
         put_user(*(shared_mem_ptr++), buffer++);
         length--;
@@ -60,13 +62,10 @@ static int __init my_module_init(void) {
 
     cdev_init(&my_cdev, &my_fops);
     cdev_add(&my_cdev, dev_num, 1);
+
     printk(KERN_INFO "my_shared_mem module loaded with device number %d\n", MAJOR(dev_num));
 
     shared_memory = vmalloc_user(shared_memory_size);
-    if (!shared_memory) {
-        printk(KERN_INFO "Unable to allocate user accessible memory\n");
-        return -ENOMEM;
-    }
     printk("module_shared: shared memory allocated");
     
     const char *ss = "Hello from kernel!";
@@ -77,7 +76,7 @@ static int __init my_module_init(void) {
 static void __exit my_module_exit(void) {
     vfree(shared_memory);
     cdev_del(&my_cdev);
-    unregister_chrdev_region(dev_num, 1);
+    unregister_chrdev_region(MKDEV(major, 0), 1);
 }
 
 module_init(my_module_init);

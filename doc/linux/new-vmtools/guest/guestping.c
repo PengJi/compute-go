@@ -16,7 +16,7 @@
 #define DEVICE_NAME "guestping"
 #define MAGIC_NUMBER 0xfeedbeef
 #define HYPERCALL_NUM 66
-#define BUF_LEN 80pgd_idx
+#define BUF_LEN 80
 
 /* convert to 12 bits */
 #define BYTE_TO_BINARY(byte) \
@@ -102,9 +102,9 @@ static char Message[BUF_LEN];
 static inline void print_pte(unsigned long address, unsigned long pte,
                         unsigned long i, int level) {
     if (level == 1)
-        pr_cont("NEXT_LEVEL_GPA(CR3)  =  ");
+        pr_cont("NEXT_LVL_GPA(CR3)  =  ");
     else
-        pr_cont("NEXT_LEVEL_GPA(%s)  =  ", PREFIXES[level - 2]);
+        pr_cont("NEXT_LVL_GPA(%s)  =  ", PREFIXES[level - 2]);
     pr_cont(PTE_PHYADDR_PATTREN, UL_TO_PTE_PHYADDR(address >> PAGE_SHIFT));
     pr_cont(" +  8 * %-3lu\n", i);
     pr_cont("%-3lu: %s " PTE_PATTERN"\n", i, PREFIXES[level - 1], UL_TO_PTE(pte));
@@ -210,12 +210,12 @@ void dump_pgd(pgd_t *pgtable, int level) {
 }
 
 static int device_open(struct inode *inode, struct file *file) {
-    pr_info(DEVICE_NAME" opened\n");
+	pr_info(DEVICE_NAME" opened\n");
     return 0;
 }
 
 static ssize_t device_read(struct file *file, char __user *buffer, size_t length, loff_t *offset) {
-    pr_info(DEVICE_NAME" read\n");
+	pr_info(DEVICE_NAME" read\n");
     return 0;
 }
 
@@ -223,15 +223,15 @@ static ssize_t device_write(struct file *file, const char __user *buffer, size_t
     volatile unsigned long *ptr;
     int i;
 
-    for (i = 0; i < length && i < BUF_LEN; i++)
-        get_user(Message[i], buffer + i);
-    pr_info("get message: %s\n", Message);
+	for (i = 0; i < length && i < BUF_LEN; i++)
+		get_user(Message[i], buffer + i);
+	pr_info("get message: %s\n", Message);
 
     ptr = kmalloc(sizeof(unsigned long long), GFP_KERNEL);
     for (i = 0; i < 1; ++i)
-        ptr[i] = i*i;
+      ptr[i] = i*i;
     *ptr = MAGIC_NUMBER;
-    pr_info("Value is: %lu", *ptr);
+	pr_info("Value is: %lu", *ptr);
 
     print_va(ptr);
     dump_pgd(current->mm->pgd, 1);
@@ -240,14 +240,14 @@ static ssize_t device_write(struct file *file, const char __user *buffer, size_t
     kvm_hypercall1(HYPERCALL_NUM, paddr);
 
     for (i = 0; i < 1; ++i)
-        ptr[i] = ptr[i] - 1;
+      ptr[i] = ptr[i] - 1;
     kfree((const void *) ptr);
 
     return 0;
 }
 
 static int device_release(struct inode *inode, struct file *file) {
-    pr_info(DEVICE_NAME" closed.\n");
+	pr_info(DEVICE_NAME" closed.\n");
     return 0;
 }
 
@@ -259,12 +259,12 @@ static struct file_operations fops = {
     .release = device_release,
 };
 
-static int __init my_module_init(void) {
+static int __init example_init(void) {
     int ret;
 
     ret = alloc_chrdev_region(&dev_num, 0, 1, DEVICE_NAME);
     if (ret < 0) {
-        pr_alert("Unable to allocate major number\n");
+		pr_alert("Unable to allocate major number\n");
         return ret;
     }
 
@@ -272,7 +272,7 @@ static int __init my_module_init(void) {
     ret = cdev_add(&guestping_dev, dev_num, 1);
     if (ret < 0) {
         unregister_chrdev_region(dev_num, 1);
-        pr_alert("Unable to add cdev\n");
+		pr_alert("Unable to add cdev\n");
         return ret;
     }
 
@@ -280,13 +280,13 @@ static int __init my_module_init(void) {
     return 0;
 }
 
-static void __exit my_module_exit(void) {
+static void __exit example_exit(void) {
     cdev_del(&guestping_dev);
     unregister_chrdev_region(dev_num, 1);
-    pr_info("guestping module unloaded\n");
+	pr_info("guestping module unloaded\n");
 }
 
-module_init(my_module_init);
-module_exit(my_module_exit);
+module_init(example_init);
+module_exit(example_exit);
 
 MODULE_LICENSE("GPL");
