@@ -26,7 +26,6 @@ static int my_mmap(struct file *file, struct vm_area_struct *vma) {
     return remap_vmalloc_range(vma, shared_memory, 0);
 }
 
-
 static ssize_t device_read(struct file *filp, char __user *buffer, size_t length, loff_t *offset) {
     int bytes_read = 0;
     const char *shared_mem_ptr = shared_memory + *offset;

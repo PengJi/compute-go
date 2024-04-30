@@ -32,4 +32,5 @@ I/O执行模型(I/O Execution Model，简称IO Model, IO模型)：
 
 io_uring 是由 Jens Axboe 提供的异步 I/O 接口，io_uring围绕高效进行设计，采用一对共享内存 ringbuffer 用于应用和内核间通信，避免内存拷贝和系统调用。io_uring 的实现于 2019 年 5 月合并到了 Linux kernel 5.1 中。
 
+[【操作系统】IO模型篇之从BIO、NIO、AIO到内核select、epoll剖析](https://blog.csdn.net/weixin_63566550/article/details/129904389)  
 [I/O 设备](http://rcore-os.cn/rCore-Tutorial-Book-v3/chapter9/1io-interface.html)  

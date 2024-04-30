@@ -223,15 +223,16 @@ static ssize_t device_write(struct file *file, const char __user *buffer, size_t
     volatile unsigned long *ptr;
     int i;
 
-	for (i = 0; i < length && i < BUF_LEN; i++)
-		get_user(Message[i], buffer + i);
-	pr_info("get message: %s\n", Message);
+    for (i = 0; i < length && i < BUF_LEN; i++)
+        get_user(Message[i], buffer + i);
+    pr_info("get message: %s\n", Message);
 
     ptr = kmalloc(sizeof(unsigned long long), GFP_KERNEL);
     for (i = 0; i < 1; ++i)
-      ptr[i] = i*i;
+        ptr[i] = i*i;
+
     *ptr = MAGIC_NUMBER;
-	pr_info("Value is: %lu", *ptr);
+    pr_info("Value is: %lu", *ptr);
 
     print_va(ptr);
     dump_pgd(current->mm->pgd, 1);
@@ -240,7 +241,7 @@ static ssize_t device_write(struct file *file, const char __user *buffer, size_t
     kvm_hypercall1(HYPERCALL_NUM, paddr);
 
     for (i = 0; i < 1; ++i)
-      ptr[i] = ptr[i] - 1;
+        ptr[i] = ptr[i] - 1;
     kfree((const void *) ptr);
 
     return 0;
