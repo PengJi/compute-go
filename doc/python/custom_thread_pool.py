@@ -2,7 +2,6 @@ from queue import Queue
 from threading import Thread
 import time
 
-
 # 实现自定义线程池
 
 queue = Queue()

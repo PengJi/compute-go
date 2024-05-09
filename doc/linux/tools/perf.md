@@ -7,9 +7,9 @@ perf stat -a
 perf stat -p 12345
 
 # 监控特定事件
-perf stat -e cycles,instructions,cache-misses -p 12345  # 监控特定的性能计数器，如 CPU 周期数、执行的指令数和缓存未命中数，针对进程 ID 为 12345 的进程。
+# 监控特定的性能计数器，如 CPU 周期数、执行的指令数和缓存未命中数，针对进程 ID 为 12345 的进程。
+perf stat -e cycles,instructions,cache-misses -p 12345
 ```
-
 
 # 使用 perf record
 ```bash

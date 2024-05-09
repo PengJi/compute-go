@@ -57,3 +57,5 @@ mount /dev/sdb/ share
 在主机上同样挂载文件，`sudo mount -t ext4 -o loop share.img ./share`
 
 注意：如果 share 中的文件改变，则需要在 VM 或主机中重新 umount/mount。
+
+[通过QEMU+GDB调试Linux内核](https://github.com/beacer/notes/blob/master/kernel/kernel-qemu-gdb.md)

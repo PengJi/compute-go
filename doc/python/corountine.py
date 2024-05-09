@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import asyncio
 
 # Python3 协程使用
