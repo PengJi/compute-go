@@ -25,7 +25,7 @@ elapsed_time = int(monotonic.monotonic() - start_time)
 ```
 
 # 读取大文件
-## 逐行读取
+## 1 逐行读取
 ```python
 with open('filename', 'r', encoding = 'utf-8') as f:
     while True:
@@ -35,7 +35,7 @@ with open('filename', 'r', encoding = 'utf-8') as f:
         do_something(line)
 ```
 
-## 分块读取
+## 2 分块读取
 ```python
 def read_in_chunks(file_obj, chunk_size = 2048):
     """
@@ -54,7 +54,7 @@ with open('filename', 'r', encoding = 'utf-8') as f:
 
 ```
 
-## pythonic 方式
+## 3 pythonic 方式
 ```python
 with open('filename', 'r', encoding = 'utf-8') as f:
     for line in f:
@@ -83,6 +83,11 @@ def singleton(cls):
 class President:
     pass
 ```
+单例模式的应用：通常一个对象的状态是被其他对象共享的，就可以将其设计为单例，
+例如项目中使用的`数据库连接池对象`和`配置对象通常`都是单例，这样才能保证所有地方获取到的数据库连接和配置信息是完全一致的；
+而且由于对象只有唯一的实例，因此从根本上避免了重复创建对象造成的时间和空间上的开销，也避免了对资源的多重占用。
+再举个例子，项目中的`日志操作`通常也会使用单例模式，这是因为共享的日志文件一直处于打开状态，只能有一个实例去操作它，否则在写入日志的时候会产生混乱。
+
 
 # 记录函数执行时间的装饰器
 ```python
