@@ -211,18 +211,3 @@ with ThreadPool(3) as pool:
         print(pool.get_result())
 
 ```
-
-# namedtuple的用法和作用。
-命名元组与普通元组一样是不可变容器，一旦将数据存储在namedtuple的顶层属性中，数据就不能再修改了，也就意味着对象上的所有属性都遵循“一次写入，多次读取”的原则。和普通元组不同的是，命名元组中的数据有访问名称，可以通过名称而不是索引来获取保存的数据，不仅在操作上更加简单，代码的可读性也会更好。
-```python
-from collections import namedtuple
-
-Card = namedtuple('Card', ('suite', 'face'))
-card1 = Card('aa', 13)
-card2 = Card('bb', 5)
-print(f'{card1.suite}{card1.face}')
-print(f'{card2.suite}{card2.face}')
->
-aa12
-bb5
-```
