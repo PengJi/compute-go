@@ -27,6 +27,7 @@ var router = gin.Default()
 // so this one won't be so messy
 func setRoutes() {
 	routes.AddDefaultRoutes(router)
+	routes.AddStreamRoutes(router)
 
 	v1 := router.Group("/v1")
 	routes.AddUserRoutes(v1)
