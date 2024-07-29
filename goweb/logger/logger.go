@@ -78,7 +78,7 @@ func init() {
 	}
 
 	// 创建一个新的 JSON 格式的日志处理器
-	handler := slog.NewJSONHandler(file, &slog.HandlerOptions{})
+	handler := slog.NewJSONHandler(file, &slog.HandlerOptions{Level: slog.LevelInfo, AddSource: true})
 
 	// 包装处理器以支持日志级别过滤
 	level := parseLogLevel(config.AppConfig.Log.Level)

@@ -55,13 +55,14 @@ func main() {
 	defer stop()
 
 	srv := &http.Server{
-		Addr:    strconv.Itoa(config.AppConfig.Server.Port),
+		Addr:    ":" + strconv.Itoa(config.AppConfig.Server.Port),
 		Handler: router,
 	}
 
 	// Initializing the server in a goroutine so that
 	// it won't block the graceful shutdown handling below
-	log.Info("starting server at port", config.AppConfig.Server.Port)
+	// log.Info("Starting server", config.AppConfig.Server.Port)
+	log.Info("Starting server", "port", config.AppConfig.Server.Port)
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Error("listen:", slog.Any("err", err))
