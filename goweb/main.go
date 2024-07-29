@@ -34,6 +34,9 @@ func setRoutes() {
 
 	v2 := router.Group("/v2")
 	routes.AddPingRoutes(v2)
+
+	v3 := router.Group("/v3")
+	routes.AddWebSocketRoutes(v3)
 }
 
 func main() {

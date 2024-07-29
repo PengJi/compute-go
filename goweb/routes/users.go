@@ -6,6 +6,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func userSearchGET(c *gin.Context) {
+	username := c.Param("username")
+	address := c.Param("address")
+	c.JSON(http.StatusOK, gin.H{
+		"message":  "ok",
+		"username": username,
+		"address":  address,
+	})
+}
+
 func AddUserRoutes(rg *gin.RouterGroup) {
 	users := rg.Group("/users")
 
@@ -21,13 +31,5 @@ func AddUserRoutes(rg *gin.RouterGroup) {
 		c.JSON(http.StatusOK, "users pictures")
 	})
 
-	users.GET("/search/:username/:address", func(c *gin.Context) {
-		username := c.Param("username")
-		address := c.Param("address")
-		c.JSON(http.StatusOK, gin.H{
-			"message":  "ok",
-			"username": username,
-			"address":  address,
-		})
-	})
+	users.GET("/search/:username/:address", userSearchGET)
 }
