@@ -10,13 +10,13 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"go.uber.org/ratelimit"
+
 	"goweb/config"
 	"goweb/logger"
 	"goweb/middleware"
 	"goweb/routes"
-
-	"github.com/gin-gonic/gin"
-	"go.uber.org/ratelimit"
 )
 
 var limit ratelimit.Limiter

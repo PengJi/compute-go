@@ -10,10 +10,10 @@ log:
   file: "app.log"
 
 database:
-  user: "dbuser"
-  password: "dbpass"
-  host: "localhost"
-  port: 5432
+  user: "root"
+  password: "root"
+  host: "172.17.0.2"
+  port: 3306
 
 apilimit:
   limit: 100
