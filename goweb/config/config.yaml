@@ -1,0 +1,19 @@
+app:
+  name: "MyApp"
+  version: "1.0"
+
+server:
+  port: 8080
+
+log:
+  level: "INFO"
+  file: "app.log"
+
+database:
+  user: "dbuser"
+  password: "dbpass"
+  host: "localhost"
+  port: 5432
+
+apilimit:
+  limit: 100

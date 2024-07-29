@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func addUserRoutes(rg *gin.RouterGroup) {
+func AddUserRoutes(rg *gin.RouterGroup) {
 	users := rg.Group("/users")
 
 	users.GET("/", func(c *gin.Context) {
