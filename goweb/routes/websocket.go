@@ -1,14 +1,15 @@
 package routes
 
 import (
-	"log"
 	"text/template"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{} // use default option
+var (
+	upgrader = websocket.Upgrader{} // use default option
+)
 
 var homeTemplate = template.Must(template.New("").Parse(`
 <!DOCTYPE html>
@@ -66,11 +67,11 @@ window.addEventListener("load", function(evt) {
 </head>
 <body>
 <table>
-<tr><td valign="top" width="50%">
-<p>Click "Open" to create a connection to the server, 
-"Send" to send a message to the server and "Close" to close the connection. 
-You can change the message and send multiple times.
-<p>
+<tr><td valign="top" width="20%">
+<p>Click "Open" to create a connection to the server. </p>
+<p>Click "Send" to send a message to the server. </p>
+<p>Click "Close" to close the connection. </p>
+<p>You can change the message and send multiple times.</p>
 <form>
 <button id="open">Open</button>
 <button id="close">Close</button>
@@ -88,20 +89,22 @@ func echo(ctx *gin.Context) {
 	w, r := ctx.Writer, ctx.Request
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println("upgrade:", err)
+		log.Error("websocket, upgrade", "err", err)
 		return
 	}
 	defer c.Close()
+
 	for {
 		mt, message, err := c.ReadMessage()
 		if err != nil {
-			log.Println("read:", err)
+			log.Error("read message", "err", err)
 			break
 		}
-		log.Printf("recv:%s", message)
+		log.Info("recv", "message", message)
+
 		err = c.WriteMessage(mt, message)
 		if err != nil {
-			log.Println("write:", err)
+			log.Error("write", "err", err)
 			break
 		}
 	}
@@ -113,10 +116,10 @@ func home(c *gin.Context) {
 
 func AddWebSocketRoutes(rg *gin.RouterGroup) {
 	web := rg.Group("/websocket")
-	web.GET("/echo", echo)
 	web.GET("/", home)
+	web.GET("/echo", echo)
 }
 
 // API
-// /v3/websocket/echo
 // /v3/websocket/
+// /v3/websocket/echo

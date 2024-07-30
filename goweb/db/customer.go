@@ -1,8 +1,6 @@
 package db
 
 import (
-	"log/slog"
-
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -22,14 +20,14 @@ func insertCustomerRow() {
 	ret, err := mysqldb.Exec(sqlStr, newCustomer.C_CUSTKEY, newCustomer.C_NAME, newCustomer.C_ADDRESS, newCustomer.C_NATIONKEY,
 		newCustomer.C_PHONE, newCustomer.C_ACCTBAL, newCustomer.C_MKTSEGMENT, newCustomer.C_COMMENT)
 	if err != nil {
-		log.Error("insert record failed", slog.Any("err", err))
+		log.Error("insert record failed", "err", err)
 		return
 	}
 
 	newID, err := ret.LastInsertId()
 	//rowsNumber, err:= ret.RowsAffected()
 	if err != nil {
-		log.Error("get primary key failed", slog.Any("err", err))
+		log.Error("get primary key failed", "err", err)
 		return
 	}
 	log.Info("insert record successfully", "primary key", newID)
@@ -39,12 +37,12 @@ func deleteCustomerRow() {
 	sqlStr := "delete from customer where 1=1 AND C_CUSTKEY = ?"
 	ret, err := mysqldb.Exec(sqlStr, newCustomer.C_CUSTKEY)
 	if err != nil {
-		log.Error("delete customer failed", slog.Any("err", err))
+		log.Error("delete customer failed", "err", err)
 		return
 	}
 	affectdRows, err := ret.RowsAffected()
 	if err != nil {
-		log.Error("get affected rows failed", slog.Any("err", err))
+		log.Error("get affected rows failed", "err", err)
 		return
 	}
 	log.Info("delete customer successfully", "affected rows", affectdRows)

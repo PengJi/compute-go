@@ -8,8 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func testSteamGET(c *gin.Context) {
-	w := c.Writer
+func testSteamGET(ctx *gin.Context) {
+	w := ctx.Writer
 	header := w.Header()
 	header.Set("Transfer-Encoding", "chunked")
 	header.Set("Content-Type", "text/html")

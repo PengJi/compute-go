@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -46,7 +45,7 @@ func main() {
 	log.Info("Starting server", "port", config.AppConfig.Server.Port)
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Error("listen:", slog.Any("err", err))
+			log.Error("listen:", "err", err)
 		}
 	}()
 
@@ -62,7 +61,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Error("Server forced to shutdown: ", slog.Any("err", err))
+		log.Error("Server forced to shutdown: ", "err", err)
 		os.Exit(1)
 	}
 
