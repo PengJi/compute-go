@@ -10,38 +10,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-gonic/gin"
-	"go.uber.org/ratelimit"
-
 	"goweb/config"
 	"goweb/db"
 	"goweb/logger"
-	"goweb/middleware"
 	"goweb/routes"
 )
 
-var (
-	limit  ratelimit.Limiter
-	router = gin.Default()
-)
-
-// getRoutes will create our routes of our entire application
-// this way every group of routes can be defined in their own file
-// so this one won't be so messy
-func setRoutes() {
-	routes.AddDefaultRoutes(router)
-	routes.AddStreamRoutes(router)
-	routes.AddCustomerRoutes(router)
-
-	v1 := router.Group("/v1")
-	routes.AddUserRoutes(v1)
-
-	v2 := router.Group("/v2")
-	routes.AddPingRoutes(v2)
-
-	v3 := router.Group("/v3")
-	routes.AddWebSocketRoutes(v3)
-}
+var ()
 
 func main() {
 	log := logger.GetLogger()
@@ -54,12 +29,7 @@ func main() {
 	db.InitDB()
 
 	log.Info("setting routes")
-	setRoutes()
-
-	// router.Use(middleware.StatCost())
-	log.Info("registering middle ware")
-	limit = ratelimit.New(config.AppConfig.Apilimit.Limit)
-	router.Use(middleware.LeakBucket(limit))
+	router := routes.SetRoutes()
 
 	// Create context that listens for the interrupt signal from the OS.
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
