@@ -14,13 +14,16 @@ import (
 	"go.uber.org/ratelimit"
 
 	"goweb/config"
+	"goweb/db"
 	"goweb/logger"
 	"goweb/middleware"
 	"goweb/routes"
 )
 
-var limit ratelimit.Limiter
-var router = gin.Default()
+var (
+	limit  ratelimit.Limiter
+	router = gin.Default()
+)
 
 // getRoutes will create our routes of our entire application
 // this way every group of routes can be defined in their own file
@@ -28,6 +31,7 @@ var router = gin.Default()
 func setRoutes() {
 	routes.AddDefaultRoutes(router)
 	routes.AddStreamRoutes(router)
+	routes.AddCustomerRoutes(router)
 
 	v1 := router.Group("/v1")
 	routes.AddUserRoutes(v1)
@@ -45,6 +49,9 @@ func main() {
 
 	log.Info("loading configuration")
 	config.LoadConfig()
+
+	log.Info("initing mysql database")
+	db.InitDB()
 
 	log.Info("setting routes")
 	setRoutes()

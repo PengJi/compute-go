@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"database/sql"
@@ -12,14 +12,13 @@ import (
 )
 
 var (
-	db      *sql.DB
-	dbName  string = "user"
+	mysqldb *sql.DB
+	dbName  string = "TPCD"
 	charset string = "utf8"
+	log            = logger.GetLogger()
 )
 
-func initDB() (err error) {
-	log := logger.GetLogger()
-
+func InitDB() (err error) {
 	dsn := fmt.Sprintf(
 		"%s:%s@tcp(%s:%d)/%s?charset=%s",
 		config.AppConfig.Database.User,
@@ -29,236 +28,221 @@ func initDB() (err error) {
 		dbName,
 		charset,
 	)
-	db, err = sql.Open("mysql", dsn)
+	mysqldb, err = sql.Open("mysql", dsn)
 	if err != nil {
 		log.Error("Failed to open database", slog.Any("err", err))
 		return err
 	}
 
-	err = db.Ping()
+	err = mysqldb.Ping()
 	if err != nil {
-		log.Error("connect database failed", slog.Any("err", err))
+		log.Error("connect database failed", "err", err)
 		return err
 	}
-	db.SetMaxOpenConns(50)
+	mysqldb.SetMaxOpenConns(50)
 	// db.SetMaxIdleConns(20)
-	fmt.Println("连接数据库成功！")
-	log.Info("connect database successfully")
+	log.Info("connect database successfully", "db address", config.AppConfig.Database.Host)
 	return nil
 }
 
-type user struct {
-	id      int
-	name    string
-	age     int
-	address string
-}
+func TestDB() {
+	newCustomer := Customer{
+		C_CUSTKEY:    1500001,
+		C_NAME:       "xiaoming",
+		C_ADDRESS:    "beijing",
+		C_NATIONKEY:  86,
+		C_PHONE:      "25-989-741-2988",
+		C_ACCTBAL:    711.56,
+		C_MKTSEGMENT: "BUILDING",
+		C_COMMENT:    "some comments"}
+	insertRow(newCustomer)
 
-func main() {
-	err := initDB()
-	if err != nil {
-		fmt.Println("初始化数据库失败,err", err)
-		return
-	}
-	//新建一个user的结构体变量
-	newUser := user{
-		name: "赵六",
-		age:  98}
-	insertRow(newUser)
+	updateCustomer := Customer{
+		C_CUSTKEY:    1500001,
+		C_NAME:       "xiaoming",
+		C_ADDRESS:    "beijing",
+		C_NATIONKEY:  86,
+		C_PHONE:      "25-989-741-2988",
+		C_ACCTBAL:    711.56,
+		C_MKTSEGMENT: "BUILDING",
+		C_COMMENT:    "updated comments"}
+	updateRow(updateCustomer)
 
-	//需要修改的数据库对应记录的user结构体
-	updateUser := user{
-		id:   7,
-		name: "蜡笔小新",
-		age:  98}
-	updateRow(updateUser)
+	deleteCustomer := Customer{
+		C_CUSTKEY:    1500001,
+		C_NAME:       "xiaoming",
+		C_ADDRESS:    "beijing",
+		C_NATIONKEY:  86,
+		C_PHONE:      "25-989-741-2988",
+		C_ACCTBAL:    711.56,
+		C_MKTSEGMENT: "BUILDING",
+		C_COMMENT:    "some comments"}
+	defer deleteRow(deleteCustomer)
 
-	//需要修改的数据库对应记录的user结构体，id不能为空
-	deleteUser := user{
-		id:   6,
-		name: "蜡笔小新",
-		age:  98}
-	deleteRow(deleteUser)
-
-	//需要修改的数据库对应记录的user结构体，id不能为空
-	queryUser := user{
-		id: 3}
+	queryUser := Customer{C_CUSTKEY: 1500001}
 	QueryRow(queryUser)
 
-	// 多行查询
 	queryRows()
 
-	// 查询预处理
 	prepareQueryRow()
 
-	// 批量插入
-	prepareInsertDemo()
+	// prepareInsertDemo()
 
-	// 事务
-	transDemo()
+	// transDemo()
 }
 
-// 向数据表中插入数据
-// 参数说明newUser   ----user结构体
-func insertRow(newUser user) {
-	//需要插入的sql语句，？表示占位参数
-	sqlStr := "insert into user(name,age) values(?,?)"
-	//把user结构体的name、age字段依次传给sqlStr的占位参数
-	ret, err := db.Exec(sqlStr, newUser.name, newUser.age)
-	if err != nil { //执行sql语句报错
-		fmt.Println("插入失败,err", err)
-		return
-	}
-	newID, err := ret.LastInsertId() //新插入数据的ID，默认为主键
-	//rowsNumber, err:= ret.RowsAffected() //受影响的行数
+func insertRow(newCustomer Customer) {
+	sqlStr := "insert into customer(C_CUSTKEY, C_NAME, C_ADDRESS, C_NATIONKEY, C_PHONE, C_ACCTBAL, C_MKTSEGMENT, C_COMMENT)" +
+		" values(?,?,?,?,?,?,?,?)"
+	ret, err := mysqldb.Exec(sqlStr, newCustomer.C_CUSTKEY, newCustomer.C_NAME, newCustomer.C_ADDRESS, newCustomer.C_NATIONKEY,
+		newCustomer.C_PHONE, newCustomer.C_ACCTBAL, newCustomer.C_MKTSEGMENT, newCustomer.C_COMMENT)
 	if err != nil {
-		fmt.Println("获取id失败,err", err)
+		log.Error("insert record failed", slog.Any("err", err))
 		return
 	}
-	fmt.Println("插入成功，id为：", newID)
+
+	newID, err := ret.LastInsertId()
+	//rowsNumber, err:= ret.RowsAffected()
+	if err != nil {
+		log.Error("get primary key failed", slog.Any("err", err))
+		return
+	}
+	log.Info("insert record successfully", "primary key", newID)
 }
 
-// 更新数据
-// updateUser   ----需要更新的user结构体
-func updateRow(updateUser user) {
-	sqlStr := "update user set age=?,name=? where id = ?"
-	ret, err := db.Exec(sqlStr, updateUser.age, updateUser.name, updateUser.id)
+func updateRow(updateCustomer Customer) {
+	sqlStr := "update customer set C_COMMENT=? where C_CUSTKEY = ?"
+	ret, err := mysqldb.Exec(sqlStr, updateCustomer.C_COMMENT)
 	if err != nil {
-		fmt.Printf("更新失败,err:%v\n", err)
+		log.Error("udpate failed", slog.Any("err", err))
 		return
 	}
-	n, err := ret.RowsAffected() // 操作影响的行数
+	affectdRows, err := ret.RowsAffected()
 	if err != nil {
-		fmt.Printf("获取影响行数失败,err:%v\n", err)
+		log.Error("get affectd rows failed", slog.Any("err", err))
 		return
 	}
-	fmt.Printf("更新成功，影响行数为:%d\n", n)
+	log.Info("udpate successfully", "affected rows", affectdRows)
 }
 
-// 删除数据
-// deleteUser   ----需要删除的user结构体，删除的条件还可以是 age name等等
-func deleteRow(deleteUser user) {
-	sqlStr := "DELETE FROM user WHERE 1=1 AND  id = ?"
-	ret, err := db.Exec(sqlStr, deleteUser.id)
+func deleteRow(deleteCustomer Customer) {
+	sqlStr := "delete from customer where 1=1 AND C_CUSTKEY = ?"
+	ret, err := mysqldb.Exec(sqlStr, deleteCustomer.C_CUSTKEY)
 	if err != nil {
-		fmt.Printf("删除数据失败,err:%v\n", err)
+		log.Error("delete customer failed", slog.Any("err", err))
 		return
 	}
-	n, err := ret.RowsAffected() // 操作影响的行数
+	affectdRows, err := ret.RowsAffected()
 	if err != nil {
-		fmt.Printf("获取影响行数失败,err:%v\n", err)
+		log.Error("get affected rows failed", slog.Any("err", err))
 		return
 	}
-	fmt.Printf("删除数据成功，影响行数为:%d\n", n)
+	log.Info("delete customer successfully", "affected rows", affectdRows)
 }
 
-// 查询数据
-func QueryRow(queryUser user) {
-	sqlStr := "SELECT id,name,age from user WHERE 1=1 AND  id = ?"
-	row := db.QueryRow(sqlStr, queryUser.id)
-	var u user
-	//然后使用Scan()方法给对应类型变量赋值，以便取出结果,注意传入的是指针
-	err := row.Scan(&u.id, &u.name, &u.age)
+func QueryRow(queryCustomer Customer) {
+	sqlStr := "SELECT C_CUSTKEY, C_NAME, C_ADDRESS from customer WHERE 1=1 AND C_CUSTKEY = ?"
+	row := mysqldb.QueryRow(sqlStr, queryCustomer.C_CUSTKEY)
+	var cus Customer
+	err := row.Scan(&cus.C_CUSTKEY, &cus.C_NAME, &cus.C_ADDRESS)
 	if err != nil {
-		fmt.Printf("获取数据错误, err:%v\n", err)
+		log.Error("query record failed", slog.Any("err", err))
 		return
 	}
-	fmt.Printf("查询数据成功%#v", u)
+	log.Info("get record successfully", "C_CUSTKEY", cus.C_CUSTKEY, "C_NAME", cus.C_NAME, "C_ADDRESS", cus.C_ADDRESS)
 }
 
-// 多行查询
 func queryRows() {
-	sqlStr := "select id,name,age from user where id>?"
-	rows, err := db.Query(sqlStr, 0)
+	sqlStr := "select C_CUSTKEY, C_NAME, C_ADDRESS from customer where C_CUSTKEY<?"
+	rows, err := mysqldb.Query(sqlStr, 2)
 	if err != nil {
-		fmt.Println("查询失败,err", err)
-		return
-	}
-	defer rows.Close() //关闭连接
-	//循环读取数据
-	for rows.Next() {
-		var u user
-		err := rows.Scan(&u.id, &u.name, &u.age)
-		if err != nil {
-			fmt.Println("scan失败,err", err)
-			return
-		}
-		fmt.Printf("id:%d	name:%s		age:%d\n", u.id, u.name, u.age)
-	}
-}
-
-// 查询预处理
-func prepareQueryRow() {
-	sqlStr := "select id,name,age from user where id > ?"
-	stmt, err := db.Prepare(sqlStr)
-	if err != nil {
-		fmt.Println("预处理失败,err", err)
-		return
-	}
-	defer stmt.Close()
-	rows, err := stmt.Query(0)
-	if err != nil {
-		fmt.Println("查询失败,err", err)
+		log.Error("query record failed", slog.Any("err", err))
 		return
 	}
 	defer rows.Close()
-	//循环读取
+
 	for rows.Next() {
-		var u user
-		err := rows.Scan(&u.id, &u.name, &u.age)
+		var cus Customer
+		err := rows.Scan(&cus.C_CUSTKEY, &cus.C_NAME, &cus.C_ADDRESS)
 		if err != nil {
-			fmt.Println("scan失败,err", err)
+			log.Error("scan record failed", slog.Any("err", err))
 			return
 		}
-		fmt.Printf("id:%d	 name:%s	 age:%d\n", u.id, u.name, u.age)
+		log.Info("query record successfully", "C_CUSTKEY", cus.C_CUSTKEY, "C_NAME", cus.C_NAME, "C_ADDRESS", cus.C_ADDRESS)
 	}
 }
 
-// 批量插入
-func prepareInsertDemo() {
-	sqlStr := "insert into user (name,age) values(?,?)"
-	stmt, err := db.Prepare(sqlStr) // 把要执行的命令发送给MySQL服务端做预处理
+func prepareQueryRow() {
+	sqlStr := "select C_CUSTKEY, C_NAME, C_ADDRESS from customer where C_CUSTKEY<?"
+	stmt, err := mysqldb.Prepare(sqlStr)
 	if err != nil {
-		fmt.Printf("预处理失败, err:%v\n", err)
+		log.Error("prepare query failed", slog.Any("err", err))
 		return
 	}
 	defer stmt.Close()
-	// 执行重复的插入命令
+
+	rows, err := stmt.Query(2)
+	if err != nil {
+		log.Error("query failed", slog.Any("err", err))
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var cus Customer
+		err := rows.Scan(&cus.C_CUSTKEY, &cus.C_NAME, &cus.C_ADDRESS)
+		if err != nil {
+			log.Error("scan record failed", slog.Any("err", err))
+			return
+		}
+		log.Info("query record successfully", "C_CUSTKEY", cus.C_CUSTKEY, "C_NAME", cus.C_NAME, "C_ADDRESS", cus.C_ADDRESS)
+	}
+}
+
+func prepareInsertDemo() {
+	sqlStr := "insert into customer (C_CUSTKEY,C_NAME) values(?,?)"
+	stmt, err := mysqldb.Prepare(sqlStr)
+	if err != nil {
+		log.Error("prepare query failed", slog.Any("err", err))
+		return
+	}
+	defer stmt.Close()
 	for i := 10; i < 15; i++ {
 		name := fmt.Sprintf("name%02d", i)
-		stmt.Exec(name, i)
+		stmt.Exec(i, name)
 	}
-	fmt.Println("批量插入成功")
+	log.Info("batch insert successfully")
 }
 
 func transDemo() {
-	tx, err := db.Begin()
+	tx, err := mysqldb.Begin()
 	if err != nil {
 		if tx != nil {
-			tx.Rollback() // 回滚
+			tx.Rollback()
 		}
-		fmt.Println("事务开启失败,err", err)
+		log.Error("start transaction failed", slog.Any("err", err))
 		return
 	}
-	sql1 := "update user set age=age+? where id=?"
+
+	sql1 := "update customer set C_COMMENT=? where C_CUSTKEY=?"
 	_, err = tx.Exec(sql1, 2, 1)
 	if err != nil {
 		tx.Rollback()
-		fmt.Println("sql1执行失败,err", err)
+		log.Error("exec sql failed", slog.Any("err", err))
 		return
 	}
-	sql2 := "update user set age=age-? where id=?"
+	sql2 := "update customer set C_COMMENT=? where C_CUSTKEY=?"
 	_, err = tx.Exec(sql2, 2, 2)
 	if err != nil {
 		tx.Rollback()
-		fmt.Println("sql2执行失败,err", err)
+		log.Error("exec sql failed", slog.Any("err", err))
 		return
 	}
 	err = tx.Commit()
 	if err != nil {
 		tx.Rollback()
-		fmt.Println("事务提交失败,err", err)
+		log.Error("commit transaction failed", slog.Any("err", err))
 		return
 	}
-	fmt.Println("数据更新成功！")
+	log.Info("udpate transaction successfully")
 }
