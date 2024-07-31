@@ -19,7 +19,7 @@ type StreamData struct {
 }
 
 var (
-	ollamaURL = "http://localhost:11434/api/generate"
+	ollamaURL = "http://192.168.124.25:11434/api/generate"
 	llmModel  = "llama3.1"
 )
 
@@ -112,5 +112,4 @@ func AddOllamaRoutes(rg *gin.RouterGroup) {
 }
 
 // API
-// /v3/websocket/
-// /v3/websocket/echo
+// /v3/ollama/
