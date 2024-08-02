@@ -21,40 +21,42 @@ window.addEventListener("load", function(evt) {
     var output = document.getElementById("output");
     var input = document.getElementById("input");
     var ws;
+
     var print = function(message) {
-        var d = document.createElement("div");
-        d.textContent = message;
-        output.appendChild(d);
+        output.innerHTML += message;
         output.scroll(0, output.scrollHeight);
     };
+
     document.getElementById("open").onclick = function(evt) {
         if (ws) {
             return false;
         }
         ws = new WebSocket("{{.}}");
         ws.onopen = function(evt) {
-            print("OPEN");
+            print("OPEN<br>");
         }
         ws.onclose = function(evt) {
-            print("CLOSE");
+            print("CLOSE<br>");
             ws = null;
         }
         ws.onmessage = function(evt) {
-            print("RESPONSE: " + evt.data);
+            print(evt.data + " "); // response
         }
         ws.onerror = function(evt) {
-            print("ERROR: " + evt.data);
+            print("ERROR: " + evt.data + "<br>");
         }
         return false;
     };
+
     document.getElementById("send").onclick = function(evt) {
         if (!ws) {
             return false;
         }
-        print("SEND: " + input.value);
+        print("<br>" + "SEND: " + input.value + "<br>");
         ws.send(input.value);
         return false;
     };
+
     document.getElementById("close").onclick = function(evt) {
         if (!ws) {
             return false;

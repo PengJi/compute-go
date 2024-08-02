@@ -67,7 +67,7 @@ func reqEcho(ctx *gin.Context) {
 			log.Error("Unexpected status code", "err", resp.StatusCode)
 		}
 
-		var respStr bytes.Buffer
+		// var respStr bytes.Buffer
 		var data StreamData
 		scanner := bufio.NewScanner(resp.Body)
 		for scanner.Scan() {
@@ -90,13 +90,12 @@ func reqEcho(ctx *gin.Context) {
 				break
 			}
 
-			respStr.WriteString(data.Response)
-		}
-
-		err = c.WriteMessage(mt, respStr.Bytes())
-		if err != nil {
-			log.Error("write", "err", err)
-			break
+			// respStr.WriteString(data.Response)
+			err = c.WriteMessage(mt, []byte(data.Response))
+			if err != nil {
+				log.Error("write", "err", err)
+				break
+			}
 		}
 	}
 }
