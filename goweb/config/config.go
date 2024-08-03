@@ -2,8 +2,6 @@ package config
 
 import (
 	"log"
-	"path/filepath"
-	"runtime"
 
 	"github.com/spf13/viper"
 )
@@ -31,19 +29,13 @@ type Config struct {
 	} `mapstructure:"apilimit"`
 }
 
+var ConfigPath string
 var AppConfig Config
 
 func LoadConfig() {
-	// 获取当前文件的路径
-	_, filePath, _, ok := runtime.Caller(0)
-	if !ok {
-		log.Fatalf("Error retrieving current file path")
-	}
-
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
-	// viper.AddConfigPath("./config/")
-	viper.AddConfigPath(filepath.Dir(filePath))
+	viper.AddConfigPath(ConfigPath)
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file, %s", err)

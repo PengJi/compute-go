@@ -5,6 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+
+	"goweb/logger"
 )
 
 var (
@@ -36,7 +38,7 @@ window.addEventListener("load", function(evt) {
             print("OPEN<br>");
         }
         ws.onclose = function(evt) {
-            print("CLOSE<br>");
+            print("<br>CLOSE<br>");
             ws = null;
         }
         ws.onmessage = function(evt) {
@@ -91,7 +93,7 @@ func echo(ctx *gin.Context) {
 	w, r := ctx.Writer, ctx.Request
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Error("websocket, upgrade", "err", err)
+		logger.Log.Error("websocket, upgrade", "err", err)
 		return
 	}
 	defer c.Close()
@@ -99,14 +101,14 @@ func echo(ctx *gin.Context) {
 	for {
 		mt, message, err := c.ReadMessage()
 		if err != nil {
-			log.Error("read message", "err", err)
+			logger.Log.Error("read message", "err", err)
 			break
 		}
-		log.Info("recv", "message", message)
+		logger.Log.Info("recv", "message", message)
 
 		err = c.WriteMessage(mt, message)
 		if err != nil {
-			log.Error("write", "err", err)
+			logger.Log.Error("write", "err", err)
 			break
 		}
 	}

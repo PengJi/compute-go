@@ -23,13 +23,14 @@ ENV PATH=$PATH:/usr/local/go/bin
 # run web server
 RUN git clone https://github.com/PengJi/kvmtool-rs.git && \
     cd kvmtool-rs/goweb && \
+    cp config/config.yaml /etc/ && \
     go env -w GO111MODULE=on && \
     go env -w GOPROXY=https://goproxy.cn,direct && \
     go build -o /usr/local/bin/webserver main.go
 
 EXPOSE 8080
 ENV GIN_MODE=release
-CMD ["/usr/local/bin/webserver"]
+CMD ["/usr/local/bin/webserver", "--config="/etc/config.yaml""]
 
 # docker build -f web.dockerfile -t registry.cn-beijing.aliyuncs.com/pengji/dev:web-debian12 .
 # docker run -d -p 8081:8080 registry.cn-beijing.aliyuncs.com/pengji/dev:web-debian12

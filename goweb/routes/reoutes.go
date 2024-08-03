@@ -11,7 +11,6 @@ import (
 
 var (
 	router = gin.Default()
-	log    = logger.GetLogger()
 	limit  ratelimit.Limiter
 )
 
@@ -34,7 +33,7 @@ func SetRoutes() *gin.Engine {
 	AddOllamaRoutes(v3)
 
 	// router.Use(middleware.StatCost())
-	log.Info("registering middle ware")
+	logger.Log.Info("registering middle ware")
 	limit = ratelimit.New(config.AppConfig.Apilimit.Limit)
 	router.Use(middleware.LeakBucket(limit))
 

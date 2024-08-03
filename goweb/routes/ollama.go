@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
+	"goweb/logger"
 )
 
 // llama response data
@@ -27,7 +29,7 @@ func reqEcho(ctx *gin.Context) {
 	w, r := ctx.Writer, ctx.Request
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Error("websocket, upgrade", "err", err)
+		logger.Log.Error("websocket, upgrade", "err", err)
 		return
 	}
 	defer c.Close()
@@ -35,10 +37,10 @@ func reqEcho(ctx *gin.Context) {
 	for {
 		mt, message, err := c.ReadMessage()
 		if err != nil {
-			log.Error("read message", "err", err)
+			logger.Log.Error("read message", "err", err)
 			break
 		}
-		log.Info("recv", "message", message)
+		logger.Log.Info("recv", "message", message)
 
 		reqMessage := string(message)
 		requestBody, err := json.Marshal(map[string]string{
@@ -46,25 +48,25 @@ func reqEcho(ctx *gin.Context) {
 			"prompt": reqMessage,
 		})
 		if err != nil {
-			log.Error("Error creating request body", "err", err)
+			logger.Log.Error("Error creating request body", "err", err)
 			return
 		}
 
 		req, err := http.NewRequest("POST", ollamaURL, bytes.NewBuffer(requestBody))
 		if err != nil {
-			log.Error("Error creating request", "err", err)
+			logger.Log.Error("Error creating request", "err", err)
 			return
 		}
 		req.Header.Set("Content-Type", "application/json")
 
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			log.Error("Error making request", "err", err)
+			logger.Log.Error("Error making request", "err", err)
 			return
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
-			log.Error("Unexpected status code", "err", resp.StatusCode)
+			logger.Log.Error("Unexpected status code", "err", resp.StatusCode)
 		}
 
 		// var respStr bytes.Buffer
@@ -74,13 +76,13 @@ func reqEcho(ctx *gin.Context) {
 			// scan each line
 			line := scanner.Text()
 			if err := scanner.Err(); err != nil {
-				log.Error("Error reading stream", "err", err)
+				logger.Log.Error("Error reading stream", "err", err)
 				break
 			}
 
 			err := json.Unmarshal([]byte(line), &data)
 			if err != nil {
-				log.Error("Error parsing JSON", "err", err)
+				logger.Log.Error("Error parsing JSON", "err", err)
 				continue
 			}
 
@@ -93,7 +95,7 @@ func reqEcho(ctx *gin.Context) {
 			// respStr.WriteString(data.Response)
 			err = c.WriteMessage(mt, []byte(data.Response))
 			if err != nil {
-				log.Error("write", "err", err)
+				logger.Log.Error("write", "err", err)
 				break
 			}
 		}

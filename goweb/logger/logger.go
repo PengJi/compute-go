@@ -2,6 +2,7 @@ package logger
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 
@@ -66,14 +67,13 @@ func (h *levelHandler) WithGroup(name string) slog.Handler {
 	return &levelHandler{handler: h.handler.WithGroup(name), level: h.level}
 }
 
-var log *slog.Logger
+var Log *slog.Logger
 
-func init() {
-	config.LoadConfig()
-
+func InitLogger() {
 	// 打开或创建一个日志文件
 	file, err := os.OpenFile(config.AppConfig.Log.File, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
+		fmt.Println("Error:", err)
 		panic(err)
 	}
 
@@ -85,10 +85,5 @@ func init() {
 	levelHandler := &levelHandler{handler: handler, level: level}
 
 	// 创建全局的日志记录器
-	log = slog.New(levelHandler)
-}
-
-// GetLogger 返回全局的日志记录器
-func GetLogger() *slog.Logger {
-	return log
+	Log = slog.New(levelHandler)
 }
