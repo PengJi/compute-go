@@ -30,7 +30,7 @@ RUN git clone https://github.com/PengJi/kvmtool-rs.git && \
 
 EXPOSE 8080
 ENV GIN_MODE=release
-CMD ["/usr/local/bin/webserver", "--config="/etc/config.yaml""]
+CMD ["/usr/local/bin/webserver", "--config=/etc/"]
 
 # docker build -f web.dockerfile -t registry.cn-beijing.aliyuncs.com/pengji/dev:web-debian12 .
 # docker run -d -p 8081:8080 registry.cn-beijing.aliyuncs.com/pengji/dev:web-debian12
