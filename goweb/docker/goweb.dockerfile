@@ -2,7 +2,8 @@ FROM debian:bookworm-slim
 
 USER root
 
-RUN sed -i 's\http://deb.debian.org/\http://mirrors.tuna.tsinghua.edu.cn/\' /etc/apt/sources.list
+RUN ls /etc/apt/
+RUN sed -i 's\http://deb.debian.org/\http://mirrors.tuna.tsinghua.edu.cn/\' /etc/apt/sources.list.d/debian.sources
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -yy apt-transport-https eatmydata
 
@@ -21,8 +22,8 @@ RUN wget https://go.dev/dl/go1.22.5.linux-amd64.tar.gz && \
 ENV PATH=$PATH:/usr/local/go/bin
 
 # run web server
-RUN git clone https://github.com/PengJi/kvmtool-rs.git && \
-    cd kvmtool-rs/goweb && \
+RUN git clone https://github.com/PengJi/compute-go.git && \
+    cd compute-go/goweb && \
     cp config/config.yaml /etc/ && \
     go env -w GO111MODULE=on && \
     go env -w GOPROXY=https://goproxy.cn,direct && \
