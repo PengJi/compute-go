@@ -1,19 +1,19 @@
 app:
   name: "MyApp"
   version: "1.0"
-
+# web server
 server:
   port: 8080
-
+# log file
 log:
   level: "INFO"
   file: "app.log"
-
+# connect local database
 database:
   user: "root"
   password: "root"
   host: "172.17.0.2"
   port: 3306
-
+# api control
 apilimit:
   limit: 100
