@@ -1,5 +1,7 @@
 Linux 启动流程
 
+[linux启动流程](https://docs.google.com/document/d/1C5f9Ey39yZyiMiYvS9kolPltjuoaXtpsN4dJjTnR578/edit)
+
 BIOS
 MBR
 GRUB
