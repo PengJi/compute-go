@@ -829,10 +829,10 @@ virsh qemu-monitor-command ca4152ab-b978-4594-be4f-b41bb2532146 --pretty '{ "exe
 
 # 通过 libvirt 执行 qga
 ```bash
-# 测试虚拟机里的qemu-guest-agent是否可用
+# 测试虚拟机里的 qemu-guest-agent 是否可用
 virsh qemu-agent-command ca4152ab-b978-4594-be4f-b41bb2532146 --pretty '{ "execute": "guest-ping" }'
 
-# 查看支持的qemu-guest-agent指令
+# 查看支持的 qemu-guest-agent 指令
 virsh qemu-agent-command ca4152ab-b978-4594-be4f-b41bb2532146 --pretty '{ "execute": "guest-info" }'
 
 # 获得网卡信息

@@ -1,4 +1,5 @@
-Virtio-fs（Virtio 文件系统）是一种用于在虚拟环境中共享文件系统的技术。它允许宿主机操作系统与虚拟机（VM）之间以更高效、安全且一致的方式共享文件和目录。适用于虚拟化环境中的文件共享、数据交换和存储资源管理。
+Virtio-fs（Virtio 文件系统）是一种用于在虚拟环境中共享文件系统的技术。它允许宿主机操作系统与虚拟机（VM）之间以更高效、安全且一致的方式共享文件和目录。
+适用于虚拟化环境中的文件共享、数据交换和存储资源管理。
 
 Virtio-fs 的主要用途如下：
 * 性能：Virtio-fs 通过提供与本地文件系统相似的性能和语义，实现了虚拟机与宿主机之间文件系统的高效共享。这对于那些对性能和应用程序兼容性有要求的场景特别重要。
@@ -25,7 +26,6 @@ Virtiofs 支持 DAX 技术，它允许客户机直接访问主机的内存，从
 
 (guest)# mount -t virtiofs myfs /mnt
 ```
-
 
 [virtio-fs: A Shared File System for Virtual Machines slide](https://static.sched.com/hosted_files/kvmforum2019/ff/virtio-fs_%20A%20Shared%20File%20System%20for%20Virtual%20Machines.pdf)  
 [virtio-fs: A Shared File System for Virtual Machines video](https://www.youtube.com/watch?v=969sXbNX01U)  

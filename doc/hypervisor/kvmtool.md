@@ -24,7 +24,7 @@ lkvm run \
 --name vm1
 ```
 
-基于disk启动方式
+基于 disk 启动方式
 ```bash
 lkvm run \
 --kernel linux-4.19/arch/x86/boot/bzImage \

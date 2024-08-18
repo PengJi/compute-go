@@ -44,7 +44,6 @@ sudo apt install qemu-guest-agent
 sudo virsh qemu-agent-command ubuntu-20_04 --pretty '{"execute": "guest-network-get-interfaces"}'
 ```
 
-
 # 使用 vnc
 ```bash
 # 获取 vnc 地址
