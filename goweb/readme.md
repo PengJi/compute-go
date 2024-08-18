@@ -4,6 +4,11 @@ cd goweb/docker
 docker build -f goweb.dockerfile -t registry.cn-beijing.aliyuncs.com/pengji/dev:goweb-v1 .
 ```
 
+拉取镜像
+```sh
+docker pull registry.cn-beijing.aliyuncs.com/pengji/dev:goweb-v1
+```
+
 运行容器
 ```sh
 docker run -d -p 8081:8080 registry.cn-beijing.aliyuncs.com/pengji/dev:goweb-v1
@@ -20,7 +25,7 @@ http://127.0.0.1:8081/v3/ollama/
 config/config.yaml
 ```
 
-运行
+直接运行代码
 ```sh
 go run main.go
 ```
