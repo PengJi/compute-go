@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goweb-deployment
+  labels:
+    app: goweb
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: goweb
+  template:
+    metadata:
+      labels:
+        app: goweb
+    spec:
+      containers:
+      - name: goweb
+        image: registry.cn-beijing.aliyuncs.com/pengji/dev:goweb-v1
+        ports:
+        - containerPort: 8080
