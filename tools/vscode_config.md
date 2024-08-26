@@ -1,3 +1,7 @@
+# 配置
+代码字体大小：搜 font
+侧边栏字体大小：搜 zoomLevel
+
 # EXTENSIONS
 ## python
 python 代码静态检查：flake8、pylance、ruff
