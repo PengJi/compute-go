@@ -1,4 +1,4 @@
-package connections
+package connection
 
 import (
 	"bufio"
@@ -14,6 +14,37 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+type ptyRequestMsg struct {
+	Term     string
+	Columns  uint32
+	Rows     uint32
+	Width    uint32
+	Height   uint32
+	Modelist string
+}
+
+type Terminal struct {
+	Columns uint32 `json:"cols"`
+	Rows    uint32 `json:"rows"`
+}
+
+type SSHClient struct {
+	Username  string `json:"username"`
+	Password  string `json:"password"`
+	IpAddress string `json:"ipaddress"`
+	Port      int    `json:"port"`
+	Session   *ssh.Session
+	Client    *ssh.Client
+	channel   ssh.Channel
+}
+
+func NewSSHClient() SSHClient {
+	client := SSHClient{}
+	client.Username = "root"
+	client.Port = 22
+	return client
+}
+
 func DecodedMsgToSSHClient(msg string) (SSHClient, error) {
 	client := NewSSHClient()
 	decoded, err := base64.StdEncoding.DecodeString(msg)
@@ -27,7 +58,7 @@ func DecodedMsgToSSHClient(msg string) (SSHClient, error) {
 	return client, nil
 }
 
-func (this *SSHClient) GenerateClient() error {
+func (s *SSHClient) GenerateClient() error {
 	var (
 		auth         []ssh.AuthMethod
 		addr         string
@@ -36,13 +67,14 @@ func (this *SSHClient) GenerateClient() error {
 		config       ssh.Config
 		err          error
 	)
+
 	auth = make([]ssh.AuthMethod, 0)
-	auth = append(auth, ssh.Password(this.Password))
+	auth = append(auth, ssh.Password(s.Password))
 	config = ssh.Config{
 		Ciphers: []string{"aes128-ctr", "aes192-ctr", "aes256-ctr", "aes128-gcm@openssh.com", "arcfour256", "arcfour128", "aes128-cbc", "3des-cbc", "aes192-cbc", "aes256-cbc"},
 	}
 	clientConfig = &ssh.ClientConfig{
-		User:    this.Username,
+		User:    s.Username,
 		Auth:    auth,
 		Timeout: 5 * time.Second,
 		Config:  config,
@@ -50,27 +82,29 @@ func (this *SSHClient) GenerateClient() error {
 			return nil
 		},
 	}
-	addr = fmt.Sprintf("%s:%d", this.IpAddress, this.Port)
+	addr = fmt.Sprintf("%s:%d", s.IpAddress, s.Port)
 	if client, err = ssh.Dial("tcp", addr, clientConfig); err != nil {
 		return err
 	}
-	this.Client = client
+	s.Client = client
 	return nil
 }
 
-func (this *SSHClient) RequestTerminal(terminal Terminal) *SSHClient {
-	session, err := this.Client.NewSession()
+func (s *SSHClient) RequestTerminal(terminal Terminal) *SSHClient {
+	session, err := s.Client.NewSession()
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
-	this.Session = session
-	channel, inRequests, err := this.Client.OpenChannel("session", nil)
+
+	s.Session = session
+	channel, inRequests, err := s.Client.OpenChannel("session", nil)
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
-	this.channel = channel
+
+	s.channel = channel
 	go func() {
 		for req := range inRequests {
 			if req.WantReply {
@@ -78,6 +112,7 @@ func (this *SSHClient) RequestTerminal(terminal Terminal) *SSHClient {
 			}
 		}
 	}()
+
 	modes := ssh.TerminalModes{
 		ssh.ECHO:          1,
 		ssh.TTY_OP_ISPEED: 14400,
@@ -100,55 +135,56 @@ func (this *SSHClient) RequestTerminal(terminal Terminal) *SSHClient {
 		Height:   uint32(terminal.Columns * 8),
 		Modelist: string(modeList),
 	}
+
 	ok, err := channel.SendRequest("pty-req", true, ssh.Marshal(&req))
 	if !ok || err != nil {
 		log.Println(err)
 		return nil
 	}
+
 	ok, err = channel.SendRequest("shell", true, nil)
 	if !ok || err != nil {
 		log.Println(err)
 		return nil
 	}
-	return this
+	return s
 }
 
-func (this *SSHClient) Connect(ws *websocket.Conn) {
-
-	//这里第一个协程获取用户的输入
+func (s *SSHClient) Run(ws *websocket.Conn) {
+	// get user input
 	go func() {
 		for {
-			// p为用户输入
 			_, p, err := ws.ReadMessage()
 			if err != nil {
 				return
 			}
-			_, err = this.channel.Write(p)
+			_, err = s.channel.Write(p)
 			if err != nil {
 				return
 			}
 		}
 	}()
 
-	//第二个协程将远程主机的返回结果返回给用户
+	// return remote host result to user
 	go func() {
-		br := bufio.NewReader(this.channel)
+		br := bufio.NewReader(s.channel)
 		buf := []byte{}
 		t := time.NewTimer(time.Microsecond * 100)
 		defer t.Stop()
-		// 构建一个信道, 一端将数据远程主机的数据写入, 一段读取数据写入ws
+		// Build a channel, writes remote host data to one end, and another one end reads data to ws.
 		r := make(chan rune)
 
-		// 另起一个协程, 一个死循环不断的读取ssh channel的数据, 并传给r信道直到连接断开
+		// Another coroutine, an endless loop that reads data from the ssh channel
+		// and passes it to the r channel until the connection is disconnected.
 		go func() {
-			defer this.Client.Close()
-			defer this.Session.Close()
+			defer s.Client.Close()
+			defer s.Session.Close()
 
 			for {
 				x, size, err := br.ReadRune()
 				if err != nil {
 					log.Println(err)
-					ws.WriteMessage(1, []byte("\033[31m已经关闭连接!\033[0m"))
+					ws.WriteMessage(1, []byte("\033[31mconnection is closed!\033[0m"))
 					ws.Close()
 					return
 				}
@@ -158,10 +194,10 @@ func (this *SSHClient) Connect(ws *websocket.Conn) {
 			}
 		}()
 
-		// 主循环
+		// main loop
 		for {
 			select {
-			// 每隔100微秒, 只要buf的长度不为0就将数据写入ws, 并重置时间和buf
+			// Every 100 microseconds, as long as the length of buf is not 0, the data is written to ws, then the time and buf are reset
 			case <-t.C:
 				if len(buf) != 0 {
 					err := ws.WriteMessage(websocket.TextMessage, buf)
@@ -172,7 +208,9 @@ func (this *SSHClient) Connect(ws *websocket.Conn) {
 					}
 				}
 				t.Reset(time.Microsecond * 100)
-			// 前面已经将ssh channel里读取的数据写入创建的通道r, 这里读取数据, 不断增加buf的长度, 在设定的 100 microsecond后由上面判定长度是否返送数据
+			// Previously, the data read in the ssh channel has been written to the created channel r.
+			// Here, the data is read, and the length of buf is continuously increased.
+			// After setting 100 microsecond, the length is determined by the above to send data back
 			case d := <-r:
 				if d != utf8.RuneError {
 					p := make([]byte, utf8.RuneLen(d))
