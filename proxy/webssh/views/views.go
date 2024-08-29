@@ -6,8 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-
-	"webssh/connection"
 )
 
 func ShellWs(c *gin.Context) {
@@ -25,12 +23,12 @@ func ShellWs(c *gin.Context) {
 	rows := c.DefaultQuery("rows", "35")
 	col, _ := strconv.Atoi(cols)
 	row, _ := strconv.Atoi(rows)
-	terminal := connection.Terminal{
+	terminal := Terminal{
 		Columns: uint32(col),
 		Rows:    uint32(row),
 	}
 
-	sshClient, err := connection.DecodedMsgToSSHClient(msg)
+	sshClient, err := DecodedMsgToSSHClient(msg)
 	if err != nil {
 		c.Error(err)
 		return
