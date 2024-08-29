@@ -329,7 +329,7 @@ webpackJsonp([1], {
                             pass: "",
                             checkPass: "",
                             port: 22,
-                            ipaddress: "",
+                            ipaddress: "192.168.35.141",
                             username: "jipeng"
                         },
                         rules: {
