@@ -11,8 +11,8 @@ import (
 
 var (
 	EnvGOPATH     = os.Getenv("GOPATH")
-	TemplateFiles = "/home/jipeng/compute-go/proxy/webssh/templates/*.html"
-	StaticFiles   = "/home/jipeng/compute-go/proxy/webssh/templates/static"
+	TemplateFiles = "/home/jipeng/compute-go/proxy/ssh-proxy/templates/*.html"
+	StaticFiles   = "/home/jipeng/compute-go/proxy/ssh-proxy/templates/static"
 )
 
 // handle any errors encountered

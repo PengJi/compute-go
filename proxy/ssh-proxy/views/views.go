@@ -18,6 +18,7 @@ func ShellWs(c *gin.Context) {
 		},
 	}
 	var err error
+
 	msg := c.DefaultQuery("msg", "")
 	cols := c.DefaultQuery("cols", "150")
 	rows := c.DefaultQuery("rows", "35")

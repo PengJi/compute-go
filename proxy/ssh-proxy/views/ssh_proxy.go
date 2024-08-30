@@ -150,7 +150,7 @@ func (s *SSHClient) RequestTerminal(terminal Terminal) *SSHClient {
 }
 
 func (s *SSHClient) Run(ws *websocket.Conn) {
-	// get user input
+	// get user input data
 	go func() {
 		for {
 			_, p, err := ws.ReadMessage()
@@ -164,16 +164,16 @@ func (s *SSHClient) Run(ws *websocket.Conn) {
 		}
 	}()
 
-	// return remote host result to user
 	go func() {
 		br := bufio.NewReader(s.channel)
 		buf := []byte{}
 		t := time.NewTimer(time.Microsecond * 100)
 		defer t.Stop()
-		// Build a channel, writes remote host data to one end, and another one end reads data to ws.
+
+		// Build a channel, writes ssh channel data to one end, and another one end reads data to ws.
 		r := make(chan rune)
 
-		// Another coroutine, an endless loop that reads data from the ssh channel
+		// an endless loop that reads data from the ssh channel
 		// and passes it to the r channel until the connection is disconnected.
 		go func() {
 			defer s.Client.Close()
