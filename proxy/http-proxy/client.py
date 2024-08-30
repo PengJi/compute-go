@@ -15,7 +15,10 @@ def test_upload(jwt_token):
     files = [
         (
             "file",
-            ("upload_file.txt", open("/home/jipeng/compute-go/proxy/http-proxy/file-server/upload_file.txt"), "application/plain"),
+            (
+                "upload_file.txt", open("/home/jipeng/compute-go/proxy/http-proxy/file-server/upload_file.txt"),
+                "application/plain"
+            ),
         )
     ]
     headers = {
