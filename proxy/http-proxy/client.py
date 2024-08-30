@@ -1,9 +1,10 @@
+import click
 import requests
 
 ADDR = "http://192.168.35.141:80"
 
 
-def test_upload():
+def test_upload(jwt_token):
     """
     上传本地pdf到指定路径
     API: /efile/openapi/v2/file/upload
@@ -18,7 +19,7 @@ def test_upload():
         )
     ]
     headers = {
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50U3RhdHVzIjoiYWN0aXZlIiwiY2x1c3RlcklkIjoiMCIsImV4cCI6MTcyNDg1Mjk2NiwidXNlcm5hbWUiOiJ0ZXN0In0.0DtyGjVLkCy-RCNC65rl3Pg2_Af_cw_JpJATePganno"
+        "token": jwt_token
     }
 
     response = requests.request("POST", url, headers=headers, data=payload, files=files)
@@ -26,7 +27,7 @@ def test_upload():
     print(response.text)
 
 
-def test_download():
+def test_download(jwt_token):
     """
     下载指定路径pdf
     API: /efile/openapi/v2/file/download
@@ -36,7 +37,7 @@ def test_download():
     payload = {}
     headers = {
         "Content-Type": "application/json",
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50U3RhdHVzIjoiYWN0aXZlIiwiY2x1c3RlcklkIjoiMCIsImV4cCI6MTcyNDg1Mjk2NiwidXNlcm5hbWUiOiJ0ZXN0In0.0DtyGjVLkCy-RCNC65rl3Pg2_Af_cw_JpJATePganno"
+        "token": jwt_token
     }
 
     response = requests.request("GET", url, headers=headers, data=payload)
@@ -44,7 +45,30 @@ def test_download():
     print(response.text)
 
 
+@click.group(name="file_server")
+def file_server():
+    """Define group of commands to run qmp and script over qemu-ga for testing purpose."""
+    pass
+
+
+@file_server.command(name="run")
+@click.option("-u", "--upload", is_flag=True, help="upload file")
+@click.option("-d", "--download", is_flag=True, help="download file")
+@click.option("-t", "--token", required=False, default="", help="valid token")
+def run(upload, download, token):
+    if upload and token:
+        test_upload(token)
+        return
+
+    if download and token:
+        test_download(token)
+        return
+
+    print("Please specify either upload or download.")
+
+
 if __name__ == "__main__":
+    run()
     # test_upload()
     test_download()
 

@@ -4,12 +4,6 @@ import requests
 ADDR = "http://172.26.23.163:8080"
 
 
-@click.group(name="token")
-def token():
-    """Define group of commands to run qmp and script over qemu-ga for testing purpose."""
-    pass
-
-
 def generate_token():
     url = ADDR + "/ac/openapi/v2/tokens"
     payload = {}
@@ -39,15 +33,25 @@ def validate_token(jwt_token):
     print(response.text)
 
 
+@click.group(name="token")
+def token():
+    """Define group of commands to run qmp and script over qemu-ga for testing purpose."""
+    pass
+
+
 @token.command(name="run")
 @click.option("-g", "--generate", is_flag=True, help="generate token")
-@click.option("-t", "--token", required=False, default="", help="uuid of vm to run the command")
+@click.option("-t", "--token", required=False, default="", help="token to be verified")
 def run(generate, token):
     if generate:
         generate_token()
+        return
 
     if token:
         validate_token(token)
+        return
+
+    print("Please specify either generate or token.")
 
 
 if __name__ == "__main__":
