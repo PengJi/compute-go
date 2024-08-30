@@ -7,7 +7,7 @@ def test_upload():
     """
     上传本地pdf到指定路径
     API: /efile/openapi/v2/file/upload
-    doc: https://www.scnet.cn/ac/openapi/doc/2.0/api/efile/upload.html
+    DOC: https://www.scnet.cn/ac/openapi/doc/2.0/api/efile/upload.html
     """
     url = ADDR + "/efile/openapi/v2/file/upload"
     payload = {"cover": "uncover", "path": "/home/jipeng/file-server"}
@@ -30,7 +30,7 @@ def test_download():
     """
     下载指定路径pdf
     API: /efile/openapi/v2/file/download
-    doc: https://www.scnet.cn/ac/openapi/doc/2.0/api/efile/download.html
+    DOC: https://www.scnet.cn/ac/openapi/doc/2.0/api/efile/download.html
     """
     url = ADDR + "/efile/openapi/v2/file/download?path=/home/jipeng/file-server/download_file.txt"
     payload = {}
