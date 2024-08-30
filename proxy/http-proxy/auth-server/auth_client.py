@@ -1,13 +1,21 @@
+import click
 import requests
 
 ADDR = "http://172.26.23.163:8080"
 
 
-def get_token():
+@click.group(name="token")
+def token():
+    """Define group of commands to run qmp and script over qemu-ga for testing purpose."""
+    pass
+
+
+def generate_token():
     url = ADDR + "/ac/openapi/v2/tokens"
     payload = {}
     headers = {
         "Content-Type": "application/json",
+        # TODO
         "user": "test",
         "password": "111111",
         "orgid": "6048ce7ba15c2af2e8cec12991ec13cf",
@@ -18,12 +26,12 @@ def get_token():
     print(response.text)
 
 
-def validate_token():
+def validate_token(jwt_token):
     url = ADDR + "/ac/openapi/v2/tokens/state"
 
     payload = {}
     headers = {
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50U3RhdHVzIjoiYWN0aXZlIiwiY2x1c3RlcklkIjoiMCIsImV4cCI6MTcyNDg1Mjk2NiwidXNlcm5hbWUiOiJ0ZXN0In0.0DtyGjVLkCy-RCNC65rl3Pg2_Af_cw_JpJATePganno"
+        "token": jwt_token
     }
 
     response = requests.request("GET", url, headers=headers, data=payload)
@@ -31,6 +39,16 @@ def validate_token():
     print(response.text)
 
 
+@token.command(name="run")
+@click.option("-g", "--generate", is_flag=True, help="generate token")
+@click.option("-t", "--token", required=False, default="", help="uuid of vm to run the command")
+def run(generate, token):
+    if generate:
+        generate_token()
+
+    if token:
+        validate_token(token)
+
+
 if __name__ == "__main__":
-    get_token()
-    validate_token()
+    run()

@@ -66,15 +66,18 @@ func getClusterInfo(user string) []ClusterInfo {
 	return clusters
 }
 
-// 生成JWT Token
+// 生成 JWT Token
 func generateToken(user string, clusterId string, accountStatus string) string {
 	claims := jwt.MapClaims{
 		"username":      user,
 		"clusterId":     clusterId,
 		"accountStatus": accountStatus,
-		"exp":           time.Now().Add(time.Hour * 1).Unix(),
+		// 过期时间，一小时
+		"exp": time.Now().Add(time.Hour * 1).Unix(),
 	}
+	// 签名方法为HS256，对称加密
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// 签名的密钥为 jwtKey
 	tokenString, _ := token.SignedString(jwtKey)
 	return tokenString
 }
@@ -120,7 +123,7 @@ func validateToken(tokenString string) bool {
 	return false
 }
 
-// Token验证处理函数
+// Token 验证处理函数
 func tokenValidationHandler(c *gin.Context) {
 	tokenString := c.GetHeader("token")
 
