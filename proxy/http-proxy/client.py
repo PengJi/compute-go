@@ -11,11 +11,11 @@ def test_upload(jwt_token):
     DOC: https://www.scnet.cn/ac/openapi/doc/2.0/api/efile/upload.html
     """
     url = ADDR + "/efile/openapi/v2/file/upload"
-    payload = {"cover": "uncover", "path": "/home/jipeng/file-server"}
+    payload = {"cover": "cover", "path": "/home/jipeng/"}
     files = [
         (
             "file",
-            ("upload_file.txt", open("/home/jipeng/compute-go/proxy/file-server/upload_file.txt"), "application/plain"),
+            ("upload_file.txt", open("/home/jipeng/compute-go/proxy/http-proxy/file-server/upload_file.txt"), "application/plain"),
         )
     ]
     headers = {
@@ -33,7 +33,7 @@ def test_download(jwt_token):
     API: /efile/openapi/v2/file/download
     DOC: https://www.scnet.cn/ac/openapi/doc/2.0/api/efile/download.html
     """
-    url = ADDR + "/efile/openapi/v2/file/download?path=/home/jipeng/file-server/download_file.txt"
+    url = ADDR + "/efile/openapi/v2/file/download?path=/home/jipeng/upload_file.txt"
     payload = {}
     headers = {
         "Content-Type": "application/json",
