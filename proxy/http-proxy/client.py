@@ -2,6 +2,7 @@ import click
 import requests
 
 ADDR = "http://192.168.35.141:80"
+FILE_NAME = "upload_file.txt"
 
 
 def test_upload(jwt_token):
@@ -16,7 +17,7 @@ def test_upload(jwt_token):
         (
             "file",
             (
-                "upload_file.txt", open("/home/jipeng/compute-go/proxy/http-proxy/file-server/upload_file.txt"),
+                FILE_NAME, open("/home/jipeng/compute-go/proxy/http-proxy/file-server/{}".format(FILE_NAME)),
                 "application/plain"
             ),
         )
@@ -36,7 +37,7 @@ def test_download(jwt_token):
     API: /efile/openapi/v2/file/download
     DOC: https://www.scnet.cn/ac/openapi/doc/2.0/api/efile/download.html
     """
-    url = ADDR + "/efile/openapi/v2/file/download?path=/home/jipeng/upload_file.txt"
+    url = ADDR + "/efile/openapi/v2/file/download?path=/home/jipeng/{}".format(FILE_NAME)
     payload = {}
     headers = {
         "Content-Type": "application/json",
@@ -50,7 +51,7 @@ def test_download(jwt_token):
 
 @click.group(name="file_server")
 def file_server():
-    """Define group of commands to run qmp and script over qemu-ga for testing purpose."""
+    """Define group of commands"""
     pass
 
 
@@ -72,8 +73,6 @@ def run(upload, download, token):
 
 if __name__ == "__main__":
     run()
-    # test_upload()
-    test_download()
 
 
 """

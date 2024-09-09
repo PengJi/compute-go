@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	jwt "github.com/golang-jwt/jwt/v5"
 )
 
 // 区域信息结构体
@@ -39,6 +39,22 @@ type TokenValidationResponse struct {
 // JWT 密钥
 var jwtKey = []byte("secret_key")
 
+// 生成 JWT Token
+func generateToken(user string, clusterId string, accountStatus string) string {
+	claims := jwt.MapClaims{
+		"username":      user,
+		"clusterId":     clusterId,
+		"accountStatus": accountStatus,
+		// 过期时间，一小时
+		"exp": time.Now().Add(time.Hour * 1).Unix(),
+	}
+	// 签名方法为HS256，对称加密
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// 签名的密钥为 jwtKey
+	tokenString, _ := token.SignedString(jwtKey)
+	return tokenString
+}
+
 // 模拟获取区域信息
 func getClusterInfo(user string) []ClusterInfo {
 	clusters := []ClusterInfo{
@@ -64,22 +80,6 @@ func getClusterInfo(user string) []ClusterInfo {
 	}
 
 	return clusters
-}
-
-// 生成 JWT Token
-func generateToken(user string, clusterId string, accountStatus string) string {
-	claims := jwt.MapClaims{
-		"username":      user,
-		"clusterId":     clusterId,
-		"accountStatus": accountStatus,
-		// 过期时间，一小时
-		"exp": time.Now().Add(time.Hour * 1).Unix(),
-	}
-	// 签名方法为HS256，对称加密
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	// 签名的密钥为 jwtKey
-	tokenString, _ := token.SignedString(jwtKey)
-	return tokenString
 }
 
 // 认证授权处理函数

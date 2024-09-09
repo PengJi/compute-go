@@ -35,7 +35,7 @@ def validate_token(jwt_token):
 
 @click.group(name="token")
 def token():
-    """Define group of commands to run qmp and script over qemu-ga for testing purpose."""
+    """Define group of commands."""
     pass
 
 
