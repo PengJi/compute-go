@@ -1,5 +1,21 @@
-安装
-[Install Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
+[在 ubuntu20.04 安装 docker]((https://docs.docker.com/engine/install/ubuntu/#install-from-a-package))
+```bash
+# 下载文件
+wget \
+https://download.docker.com/linux/ubuntu/dists/focal/pool/stable/amd64/containerd.io_1.7.21-1_amd64.deb  \
+https://download.docker.com/linux/ubuntu/dists/focal/pool/stable/amd64/docker-ce_27.2.1-1~ubuntu.20.04~focal_amd64.deb \
+https://download.docker.com/linux/ubuntu/dists/focal/pool/stable/amd64/docker-ce-cli_27.2.1-1~ubuntu.20.04~focal_amd64.deb \
+https://download.docker.com/linux/ubuntu/dists/focal/pool/stable/amd64/docker-buildx-plugin_0.16.2-1~ubuntu.20.04~focal_amd64.deb \
+https://download.docker.com/linux/ubuntu/dists/focal/pool/stable/amd64/docker-compose-plugin_2.29.2-1~ubuntu.20.04~focal_amd64.deb
+# 安装
+sudo dpkg -i containerd.io_1.7.21-1_amd64.deb \
+  docker-ce_27.2.1-1~ubuntu.20.04~focal_amd64.deb \
+  docker-ce-cli_27.2.1-1~ubuntu.20.04~focal_amd64.deb \
+  docker-buildx-plugin_0.16.2-1~ubuntu.20.04~focal_amd64.deb \
+  docker-compose-plugin_2.29.2-1~ubuntu.20.04~focal_amd64.deb
+# 不需要 sudo 运行 docker
+# https://docs.docker.com/engine/install/linux-postinstall/
+```
 
 常用命令
 ```bash
