@@ -20,8 +20,7 @@ reboot
 ```
 如果原来的Ubuntu系统已经崩溃，无法进入。则可以使用Ubuntu安装U盘（live USB）进入试用Ubuntu界面。
 
-# 软件
-forticlient
-[https://repo.fortinet.com/](https://repo.fortinet.com/)
 
-
+# 软件源
+[debian 软件源](https://mirrors.tuna.tsinghua.edu.cn/help/debian/)
+[ubuntu 软件仓库](https://mirrors.tuna.tsinghua.edu.cn/help/ubuntu/)
