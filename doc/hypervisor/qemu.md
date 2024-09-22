@@ -4,10 +4,18 @@
 ```sh
 # 安装编译所需的依赖包
 sudo apt install autoconf automake autotools-dev curl \
-    libmpc-dev libmpfr-dev libgmp-dev \
+    git tmux python3 python3-pip ninja-build meson pkg-config \
     gawk build-essential bison flex texinfo gperf libtool patchutils bc \
-    zlib1g-dev libexpat-dev pkg-config libglib2.0-dev libpixman-1-dev libsdl2-dev \
-    git tmux python3 python3-pip ninja-build
+    libmpc-dev libmpfr-dev libgmp-dev \
+    zlib1g-dev libexpat-dev libglib2.0-dev libpixman-1-dev \
+    libsdl2-dev \
+    libspice-server-dev libspice-protocol-dev \
+    libnfs-dev liburing-dev \
+    librdmacm-dev libibverbs-dev \
+    librados-dev librbd-dev \
+    libfuse-dev libfuse3-dev\
+    libibumad-dev \
+    libcap-ng-dev libattr1-dev libseccomp-dev
 
 # 下载源码包
 wget https://download.qemu.org/qemu-7.0.0.tar.xz
@@ -20,7 +28,14 @@ cd qemu-7.0.0
 ./configure \
 --prefix=/usr \
 --target-list=riscv64-softmmu,riscv64-linux-user,x86_64-softmmu,x86_64-linux-user \
---enable-sdl  # 支持图形界面
+--enable-sdl \
+--enable-spice \
+--enable-kvm \
+--enable-rdma \
+--enable-rbd \
+--enable-fuse \
+--enable-virtfs \
+--enable-virtiofsd
 # 上述 prefix 也可为： --prefix=$HOME/qemu_build \
 # Install prefix               : /usr/local
 # BIOS directory               : share/qemu
@@ -435,12 +450,6 @@ hmp 简化了 qmp，可以通过 monitor stdio 进入 hmp 命令行，也可以�
 (qemu) device_add usb-storage,id=usb_cdrom_fastio_device_id,drive=usb_cdrom_fastio_drive_id,bus=usb-bus.0,port=1.1
 ```
 
-## 使用 qemu-guest-agent
-命令行参数
-```bash
--chardev socket,id=charmonitor,path=/var/lib/libvirt/qemu/domain-1-ubuntu20.04-agent.sock,server,nowait \
-```
-
 # 配置网络
 ```bash
 sudo brctl addbr br0
@@ -452,5 +461,40 @@ sudo qemu-system-x86_64 -kernel linux/arch/x86/boot/bzImage \
        -append 'root=/dev/sda' -boot c -hda rootfs.img -k en-us \
        -net nic -net tap,ifname=tap0
 ```
+
+# 使用 spice 实现宿主机与虚拟机共享剪贴板
+1 配置 spice
+```xml
+virsh edit <虚拟机名称>
+
+<devices>
+  ...
+  <graphics type='spice' autoport='yes' listen='0.0.0.0'>
+    <listen type='address'/>
+  </graphics>
+  <channel type='spicevmc'>
+    <target type='virtio' name='com.redhat.spice.0'/>
+  </channel>
+  ...
+</devices>
+```
+`type='spice'`：指定使用 SPICE 协议。
+`autoport='yes'`：自动分配 SPICE 端口。
+`<channel>` 元素用于启用 SPICE VMC 通道，支持剪贴板共享等功能。
+
+2 宿主机安装 spice 客户端
+```bash
+sudo apt-get update
+sudo apt-get install virt-viewer
+virt-viewer
+```
+
+3 虚拟机内安装 spice 工具
+```bash
+sudo apt-get install spice-vdagent
+sudo systemctl enable spice-vdagent
+sudo systemctl start spice-vdagent
+```
+
 
 [QEMU Guest Agent Protocol Reference](https://qemu.readthedocs.io/en/latest/interop/qemu-ga-ref.html)
