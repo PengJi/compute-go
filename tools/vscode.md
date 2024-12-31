@@ -39,6 +39,10 @@ ColumnLimit: 0
 # rust
 [ruff rules](https://beta.ruff.rs/docs/rules/#mccabe-c90)  
 
+# go
+golangci-lint
+[安装配置](https://www.superpig.win/blog/details/ujoiykoy)
+[linter](https://golangci-lint.run/usage/configuration/)
 
 # 实用快捷键
 打开左侧边栏
