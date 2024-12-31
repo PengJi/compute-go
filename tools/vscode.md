@@ -38,3 +38,10 @@ ColumnLimit: 0
 
 # rust
 [ruff rules](https://beta.ruff.rs/docs/rules/#mccabe-c90)  
+
+
+# 实用快捷键
+打开左侧边栏
+ctrl + b
+打开右侧边栏
+alt + ctrl +b

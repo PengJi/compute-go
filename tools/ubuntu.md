@@ -24,3 +24,9 @@ reboot
 # 软件源
 [debian 软件源](https://mirrors.tuna.tsinghua.edu.cn/help/debian/)
 [ubuntu 软件仓库](https://mirrors.tuna.tsinghua.edu.cn/help/ubuntu/)
+
+
+# 输入法
+fcitx5-configtool
+fcitx5-diagnose
+sudo fcitx-config-gtk3
