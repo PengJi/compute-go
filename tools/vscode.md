@@ -1,8 +1,9 @@
 # 配置
-代码字体大小：搜 font
-侧边栏字体大小：搜 zoomLevel
+代码字体大小：在配置中搜 font
+侧边栏字体大小：在配置中搜 zoomLevel
 
 # EXTENSIONS
+
 ## python
 python 代码静态检查：flake8、pylance、ruff
 ```shell
@@ -35,17 +36,18 @@ ColumnLimit: 0
 ```
 [Clang-Format Style Options](https://clang.llvm.org/docs/ClangFormatStyleOptions.html)
 
-
-# rust
+## rust
 [ruff rules](https://beta.ruff.rs/docs/rules/#mccabe-c90)  
 
-# go
+## go
 golangci-lint
+全局配置：`~/.golangci.yml`
 [安装配置](https://www.superpig.win/blog/details/ujoiykoy)
 [linter](https://golangci-lint.run/usage/configuration/)
 
 # 实用快捷键
 打开左侧边栏
-ctrl + b
+`ctrl + b`
+
 打开右侧边栏
-alt + ctrl +b
+`alt + ctrl + b`
