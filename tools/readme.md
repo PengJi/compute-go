@@ -29,3 +29,14 @@ gscp $1
 ```bash
 scp -r $(whoami)@${ip_addr}:${file_path}
 ```
+
+# 代码统计
+```bash
+# 统计项目代码
+apt install cloc
+cloc .
+
+# 按 git author 统计
+pip install git-fame
+git fame
+``` 

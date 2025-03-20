@@ -30,3 +30,8 @@ typo 拼写错误
 https://lore.kernel.org/kvm/20230811095934.254946-1-xueshi.hu@smartx.com/
 
 文档修改
+
+代码 linter
+尤其是安全相关的
+
+代码 todo/fixme

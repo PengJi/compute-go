@@ -1,4 +1,56 @@
-# qemu-ga 介绍
+# qemu-ga
+
+# 编译
+## build qemu-ga for x86_64
+```bash
+docker build --network=host -t debian12:x86_64 -f debian12_x86_64.dockerfile .
+docker run -ti --privileged --network host -v $PWD:$PWD -w $PWD debian12:x86_64 /bin/bash
+```
+
+# build qemu-ga
+```bash
+./configure --static \
+--target-list=x86_64-softmmu \
+--enable-guest-agent \
+--disable-docs \
+--disable-debug-info \
+--disable-gnutls
+make qemu-ga -j$(nproc)
+```
+
+## build qemu-ga for aarch64
+```bash
+docker build --network=host -t debian12:aarch64 -f debian12_aarch64.dockerfile .
+docker run -ti --privileged --network host -v $PWD:$PWD -w $PWD debian12:aarch64 /bin/bash
+
+# aarch64
+./configure --static --target-list=aarch64-softmmu \
+--enable-guest-agent \
+--disable-docs \
+--disable-gnutls \
+--cross-prefix=aarch64-linux-gnu-
+make qemu-ga -j$(nproc)
+```
+
+## build qemu-ga for win64
+```bash
+docker build --network=host -t debian12:win64 -f debian12_win64.dockerfile .
+docker run -ti --privileged --network host -v $PWD:$PWD -w $PWD debian12:win64 /bin/bash
+
+./configure  \
+--with-vss-sdk="/home/jipeng/qemu-elf/" \
+--cross-prefix=x86_64-w64-mingw32.static- \
+--enable-guest-agent \
+--disable-guest-agent-msi \
+--enable-tools \
+--disable-system \
+--disable-werror
+
+make -j$(nproc) qemu-ga qga/vss-win32/qga-vss.dll
+
+scp -T build/qga/qemu-ga.exe smtxauto@192.168.31.37:'"C:\program files\svt\qemu-ga.exe"'
+```
+
 # 使用
 添加设备的 controller 
 ```xml
