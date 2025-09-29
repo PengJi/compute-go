@@ -20,3 +20,8 @@ ctrl + m  ctrl + j
 
 配置： keyboard shortcuts 搜 fold
 
+## 进入设置
+```
+ctrl + ,
+```
+
