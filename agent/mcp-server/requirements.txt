@@ -1,0 +1,20 @@
+# MCP 天气服务器依赖
+
+# MCP 协议库
+mcp>=0.1.0
+
+# HTTP 客户端
+httpx>=0.25.0
+
+# 配置管理
+pyyaml>=6.0
+
+# 异步支持
+anyio>=4.0.0
+
+# 开发依赖
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+isort>=5.12.0
+mypy>=1.5.0

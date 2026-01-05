@@ -28,4 +28,6 @@ ctrl + ,
 选择python interpreter
 ```sh
 ctrl + shift + p
+
+选择 Python: select interpreter
 ```

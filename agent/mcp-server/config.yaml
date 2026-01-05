@@ -1,0 +1,72 @@
+# MCP 天气服务器配置（open-meteo 版本）
+
+# open-meteo API 配置
+open_meteo:
+  base_url: "https://api.open-meteo.com/v1/forecast"
+  # 无需 API 密钥，完全免费使用
+
+# 服务器配置
+server:
+  name: "weather-mcp-server"
+  version: "1.0.0"
+  description: "基于 open-meteo API 的实时天气查询服务器"
+  
+  # 日志配置
+  log_level: "INFO"
+  log_file: "weather_mcp.log"
+  
+  # 缓存配置
+  cache:
+    enabled: true
+    city_coordinates_ttl: 86400  # 城市坐标缓存时间（秒），24小时
+    weather_data_ttl: 900        # 天气数据缓存时间（秒），15分钟
+  
+  # 请求限制（open-meteo 无限制，这里仅为客户端限制）
+  rate_limit:
+    requests_per_minute: 60
+    requests_per_hour: 1000
+
+# 工具配置
+tools:
+  get_current_weather:
+    enabled: true
+    description: "获取指定城市的当前天气状况"
+    
+  get_weather_forecast:
+    enabled: true
+    description: "获取指定城市的天气预报"
+    default_days: 3
+    max_days: 7
+    
+  search_city:
+    enabled: true
+    description: "搜索城市，基于本地数据库查找城市坐标"
+    max_results: 10
+
+# 语言支持
+languages:
+  - code: "zh"
+    name: "中文"
+    default: true
+  - code: "en"
+    name: "English"
+
+# 城市数据库信息
+cities:
+  total_supported: 41
+  include_china_major: true
+  include_international: true
+  auto_update: false  # 是否自动更新城市数据库
+  
+# 示例城市（完整列表在 weather_server.py 的 CITY_COORDINATES 中）
+example_cities:
+  - name: "北京"
+    note: "中国首都"
+  - name: "上海"
+    note: "中国最大城市"
+  - name: "纽约"
+    note: "美国最大城市"
+  - name: "东京"
+    note: "日本首都"
+  - name: "伦敦"
+    note: "英国首都"
