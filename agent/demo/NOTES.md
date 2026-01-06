@@ -9,7 +9,7 @@ This project follows the same ReAct loop pattern as week1/context with the follo
 2. **Command-Line Interface**: Uses argparse for CLI arguments
 3. **Interactive Mode**: Default mode for user interaction
 4. **Task Execution**: `execute_task()` method with max iterations
-5. **Kimi K2 Model**: Uses the same LLM provider setup
+5. **deepseek Model**: Uses the same LLM provider setup
 
 ### Key Enhancements:
 
