@@ -13,13 +13,13 @@ def main():
     """Quick start demonstration"""
     
     # Check for API key
-    api_key = os.getenv("KIMI_API_KEY")
+    api_key = os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
-        print("❌ Error: Please set KIMI_API_KEY environment variable")
+        print("❌ Error: Please set DEEPSEEK_API_KEY environment variable")
         print("\nSetup instructions:")
         print("  1. Copy env.example to .env")
         print("  2. Add your Kimi API key to .env")
-        print("  3. Run: export KIMI_API_KEY='your-api-key-here'")
+        print("  3. Run: export DEEPSEEK_API_KEY='your-api-key-here'")
         return
     
     print("\n" + "="*60)
@@ -59,7 +59,7 @@ Use the TODO list to organize and track your analysis steps."""
     
     agent = SystemHintAgent(
         api_key=api_key,
-        provider="kimi",
+        provider="deepseek",
         config=config,
         verbose=False  # Set to True to see full API interactions
     )

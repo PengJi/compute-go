@@ -92,10 +92,10 @@ def get_sample_task() -> str:
 
 def execute_single_task(task: str, config: SystemHintConfig = None, verbose: bool = False):
     """Execute a single task with the agent"""
-    api_key = os.getenv("KIMI_API_KEY")
+    api_key = os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
-        print("❌ Error: Please set KIMI_API_KEY environment variable")
-        print("   export KIMI_API_KEY='your-api-key-here'")
+        print("❌ Error: Please set DEEPSEEK_API_KEY environment variable")
+        print("   export DEEPSEEK_API_KEY='your-api-key-here'")
         return None
     
     if config is None:
@@ -109,7 +109,7 @@ def execute_single_task(task: str, config: SystemHintConfig = None, verbose: boo
     
     agent = SystemHintAgent(
         api_key=api_key,
-        provider="kimi",
+        provider="deepseek",
         config=config,
         verbose=verbose
     )
@@ -128,10 +128,10 @@ def interactive_mode():
     """Run the agent in interactive mode"""
     print_section("Interactive Mode - System-Hint Agent")
     
-    api_key = os.getenv("KIMI_API_KEY")
+    api_key = os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
-        print("❌ Error: Please set KIMI_API_KEY environment variable")
-        print("   export KIMI_API_KEY='your-api-key-here'")
+        print("❌ Error: Please set DEEPSEEK_API_KEY environment variable")
+        print("   export DEEPSEEK_API_KEY='your-api-key-here'")
         return
     
     # Initialize agent with full features
@@ -145,7 +145,7 @@ def interactive_mode():
     
     agent = SystemHintAgent(
         api_key=api_key,
-        provider="kimi",
+        provider="deepseek",
         config=config,
         verbose=False
     )
@@ -214,9 +214,9 @@ def demo_basic_features():
     """Demonstrate basic system hint features"""
     print_section("Demo: Basic System Hint Features")
     
-    api_key = os.getenv("KIMI_API_KEY")
+    api_key = os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
-        print("❌ Please set KIMI_API_KEY environment variable")
+        print("❌ Please set DEEPSEEK_API_KEY environment variable")
         return
     
     config = SystemHintConfig(
@@ -229,7 +229,7 @@ def demo_basic_features():
     
     agent = SystemHintAgent(
         api_key=api_key,
-        provider="kimi",
+        provider="deepseek",
         config=config,
         verbose=False
     )
@@ -250,9 +250,9 @@ def demo_tool_loop_prevention():
     """Demonstrate tool call loop prevention"""
     print_section("Demo: Tool Call Loop Prevention")
     
-    api_key = os.getenv("KIMI_API_KEY")
+    api_key = os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
-        print("❌ Please set KIMI_API_KEY environment variable")
+        print("❌ Please set DEEPSEEK_API_KEY environment variable")
         return
     
     config = SystemHintConfig(
@@ -265,7 +265,7 @@ def demo_tool_loop_prevention():
     
     agent = SystemHintAgent(
         api_key=api_key,
-        provider="kimi",
+        provider="deepseek",
         config=config,
         verbose=False
     )
@@ -287,9 +287,9 @@ def demo_comparison():
     """Compare with and without system hints"""
     print_section("Demo: System Hints Comparison")
     
-    api_key = os.getenv("KIMI_API_KEY")
+    api_key = os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
-        print("❌ Please set KIMI_API_KEY environment variable")
+        print("❌ Please set DEEPSEEK_API_KEY environment variable")
         return
     
     task = """Create a simple Python script that prints 'Hello World' and save it as 'hello.py'."""
@@ -306,7 +306,7 @@ def demo_comparison():
     
     agent_with = SystemHintAgent(
         api_key=api_key,
-        provider="kimi",
+        provider="deepseek",
         config=config_with,
         verbose=False
     )
@@ -328,7 +328,7 @@ def demo_comparison():
     
     agent_without = SystemHintAgent(
         api_key=api_key,
-        provider="kimi",
+        provider="deepseek",
         config=config_without,
         verbose=False
     )

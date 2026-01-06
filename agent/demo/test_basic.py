@@ -24,7 +24,7 @@ def test_basic_functionality():
     try:
         agent = SystemHintAgent(
             api_key="test-key",  # Dummy key for initialization test
-            provider="kimi",
+            provider="deepseek",
             config=config,
             verbose=False
         )
@@ -121,7 +121,7 @@ def test_command_execution():
     config = SystemHintConfig(enable_detailed_errors=True)
     agent = SystemHintAgent(
         api_key="test-key",
-        provider="kimi",
+        provider="deepseek",
         config=config,
         verbose=False
     )

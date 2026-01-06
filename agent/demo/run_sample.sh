@@ -11,17 +11,17 @@ echo "This will analyze and summarize the AI Agent projects"
 echo "in week1 and week2 directories using the System-Hint Agent."
 echo ""
 
-# Check if KIMI_API_KEY is set
-if [ -z "$KIMI_API_KEY" ]; then
-    echo "❌ Error: KIMI_API_KEY environment variable is not set"
+# Check if DEEPSEEK_API_KEY is set
+if [ -z "$DEEPSEEK_API_KEY" ]; then
+    echo "❌ Error: DEEPSEEK_API_KEY environment variable is not set"
     echo ""
     echo "Please set it using:"
-    echo "  export KIMI_API_KEY='your-api-key-here'"
+    echo "  export DEEPSEEK_API_KEY='your-api-key-here'"
     echo ""
     exit 1
 fi
 
-echo "✅ KIMI_API_KEY is configured"
+echo "✅ DEEPSEEK_API_KEY is configured"
 echo ""
 echo "Starting analysis..."
 echo "----------------------------------------"

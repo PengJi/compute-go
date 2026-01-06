@@ -1,9 +1,9 @@
 # API Configuration
-KIMI_API_KEY=your-kimi-api-key-here
+DEEPSEEK_API_KEY=your-deepseek-api-key-here
 
 # Optional: LLM Provider Settings
-LLM_PROVIDER=kimi
-LLM_MODEL=kimi-k2-0905-preview
+LLM_PROVIDER=deepseek
+LLM_MODEL=deepseek-chat
 
 # System Hint Features (all default to true)
 ENABLE_TIMESTAMPS=true

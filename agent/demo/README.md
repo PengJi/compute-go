@@ -4,7 +4,17 @@ An advanced AI agent that demonstrates the power of system hints for improving a
 
 研究系统提示（System Hint）对 Agent 行为的影响，探索如何通过优化系统提示提升性能。
 
-核心概念：系统提示、行为引导、提示优化
+- ReAct模式
+- tool call
+- todo list
+- 
+
+- MCP
+- RAG
+- 用户记忆
+- sub agent
+- agent skills
+
 
 ## 🌟 Key Features
 
@@ -55,8 +65,8 @@ pip install -r requirements.txt
 
 # Copy and configure environment
 cp env.example .env
-# Edit .env with your KIMI_API_KEY
-export KIMI_API_KEY='your-api-key-here'
+# Edit .env with your DEEPSEEK_API_KEY
+export DEEPSEEK_API_KEY='your-api-key-here'
 ```
 
 ### Basic Usage
@@ -108,7 +118,7 @@ config = SystemHintConfig(
 # Create agent
 agent = SystemHintAgent(
     api_key="your-api-key",
-    provider="kimi",
+    provider="deepseek",
     config=config,
     verbose=False
 )
@@ -264,7 +274,7 @@ agent = SystemHintAgent('api_key', config=config)
 
 1. **API Key Not Set**
    ```bash
-   export KIMI_API_KEY='your-api-key-here'
+   export DEEPSEEK_API_KEY='your-api-key-here'
    ```
 
 2. **Tool Call Loops**

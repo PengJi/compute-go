@@ -10,9 +10,9 @@ from agent import SystemHintAgent, SystemHintConfig
 
 def test_hint_behavior():
     """Test and demonstrate the system hint behavior"""
-    api_key = os.getenv("KIMI_API_KEY")
+    api_key = os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
-        print("❌ Please set KIMI_API_KEY environment variable")
+        print("❌ Please set DEEPSEEK_API_KEY environment variable")
         return
     
     # Create agent with system hints enabled
@@ -26,7 +26,7 @@ def test_hint_behavior():
     
     agent = SystemHintAgent(
         api_key=api_key,
-        provider="kimi",
+        provider="deepseek",
         config=config,
         verbose=False
     )

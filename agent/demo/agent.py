@@ -75,7 +75,7 @@ class SystemHintAgent:
     AI Agent with enhanced system hints for better trajectory management
     """
     
-    def __init__(self, api_key: str, provider: str = "kimi", 
+    def __init__(self, api_key: str, provider: str = "deepseek", 
                  model: Optional[str] = None, config: Optional[SystemHintConfig] = None,
                  verbose: bool = True):
         """
@@ -83,7 +83,7 @@ class SystemHintAgent:
         
         Args:
             api_key: API key for the LLM provider
-            provider: LLM provider ('kimi' for Kimi K2)
+            provider: LLM provider ('deepseek')
             model: Optional model override
             config: System hint configuration
             verbose: If True, log full details
@@ -93,12 +93,12 @@ class SystemHintAgent:
         self.config = config or SystemHintConfig()
         
         # Configure client based on provider
-        if self.provider == "kimi" or self.provider == "moonshot":
+        if self.provider == "deepseek":
             self.client = OpenAI(
                 api_key=api_key,
-                base_url="https://api.moonshot.cn/v1"
+                base_url="https://api.deepseek.com"
             )
-            self.model = model or "kimi-k2-0905-preview"
+            self.model = model or "deepseek-chat"
         else:
             raise ValueError(f"Unsupported provider: {provider}")
         
