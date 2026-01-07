@@ -8,7 +8,6 @@ An advanced AI agent that demonstrates the power of system hints for improving a
 - tool call
 - todo list
 - 
-
 - MCP
 - RAG
 - 用户记忆
@@ -57,14 +56,9 @@ An advanced AI agent that demonstrates the power of system hints for improving a
 ### Installation
 
 ```bash
-# Clone the repository (if not already done)
-cd projects/week2/system-hint
-
 # Install dependencies
 pip install -r requirements.txt
 
-# Copy and configure environment
-cp env.example .env
 # Edit .env with your DEEPSEEK_API_KEY
 export DEEPSEEK_API_KEY='your-api-key-here'
 ```

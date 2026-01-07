@@ -1,5 +1,5 @@
 """
-Basic test to verify System-Hint Agent functionality
+Basic test to verify Agent functionality
 """
 
 import os

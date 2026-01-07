@@ -1,7 +1,3 @@
-# System-Hint Agent Implementation Notes
-
-## Comparison with Week1/Context Pattern
-
 This project follows the same ReAct loop pattern as week1/context with the following enhancements:
 
 ### Similarities to Week1/Context:
@@ -72,7 +68,7 @@ Following week1/context pattern with additional options:
 # Interactive mode (default)
 python main.py
 
-# Single task execution (like week1/context)
+# Single task execution
 python main.py --mode single --task "Your task here"
 
 # Sample task (new)

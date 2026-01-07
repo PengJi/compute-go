@@ -160,7 +160,7 @@ def interactive_mode():
     
     while True:
         try:
-            print("\n" + "-"*60)
+            print("\n" + "-" * 60)
             user_input = input("Task > ").strip()
             
             if not user_input:
@@ -413,9 +413,9 @@ def main():
         enable_system_state=not args.no_state
     )
     
-    print("\n" + "🤖"*40)
+    print("\n" + "🤖" * 40)
     print("  SYSTEM-HINT ENHANCED AGENT")
-    print("🤖"*40)
+    print("🤖" * 40)
     
     if args.mode == "single":
         if not args.task:
