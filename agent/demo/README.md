@@ -2,6 +2,34 @@
 
 An advanced AI agent that demonstrates the power of system hints for improving agent trajectory and preventing common issues like infinite loops, poor context awareness, and inefficient task management, with automatic trajectory saving for debugging.
 
+## Key Learnings
+1. **System hints significantly improve agent efficiency** - Agents complete tasks with fewer iterations
+2. **TODO lists provide structure** - Complex tasks become manageable
+3. **Tool counters prevent loops** - Agents recognize and avoid repetitive behavior
+4. **Detailed errors enable recovery** - Agents can adapt strategies based on specific error information
+5. **Timestamps provide context** - Useful for multi-session or long-running tasks
+
+1. **ReAct Loop**: Standard Reasoning + Acting pattern
+2. **Command-Line Interface**: Uses argparse for CLI arguments
+3. **Interactive Mode**: Default mode for user interaction
+4. **Task Execution**: `execute_task()` method with max iterations
+5. **deepseek Model**: Uses the same LLM provider setup
+
+## Best Practices Demonstrated
+1. **Prevent Infinite Loops**: Tool call counter shows "Tool call #N" to help agent recognize repetitive behavior
+2. **Temporal Awareness**: Timestamps help agent understand event sequences
+3. **Task Organization**: TODO lists for complex multi-step objectives
+4. **Error Recovery**: Detailed error messages with actionable suggestions
+5. **Context Preservation**: System state tracking across tool calls
+
+## Future Enhancements
+Potential improvements building on this foundation:
+- Memory persistence across sessions
+- Collaborative TODO lists for multi-agent systems
+- Adaptive hint generation based on task complexity
+- Performance metrics tracking
+- Integration with external task management systems
+
 研究系统提示（System Hint）对 Agent 行为的影响，探索如何通过优化系统提示提升性能。
 
 - ReAct模式
@@ -50,6 +78,7 @@ An advanced AI agent that demonstrates the power of system hints for improving a
 - Captures complete debugging information even if execution fails
 - Includes conversation history, tool calls, TODO lists, and configuration
 - Provides `view_trajectory.py` utility for analyzing saved trajectories
+
 
 ## 🚀 Quick Start
 

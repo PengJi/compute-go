@@ -75,7 +75,7 @@ class SystemHintAgent:
     AI Agent with enhanced system hints for better trajectory management
     """
     
-    def __init__(self, api_key: str, provider: str = "deepseek", 
+    def __init__(self, api_key: str, provider: str = "deepseek",
                  model: Optional[str] = None, config: Optional[SystemHintConfig] = None,
                  verbose: bool = True):
         """
@@ -467,6 +467,7 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
                 return {"error": error}, error
             
             duration_ms = int((datetime.now() - start_time).total_seconds() * 1000)
+            logger.info(f"Tool '{tool_name}' executed in {duration_ms}ms")
             return result, None
             
         except Exception as e:
@@ -526,7 +527,7 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
         return " | ".join(suggestions) if suggestions else ""
     
     # Tool implementations
-    def _tool_read_file(self, file_path: str, begin_line: Optional[int] = None, 
+    def _tool_read_file(self, file_path: str, begin_line: Optional[int] = None,
                        number_lines: Optional[int] = None) -> Dict[str, Any]:
         """Read file contents with optional line-based reading"""
         try:
@@ -813,6 +814,7 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
                 self.last_llm_messages = messages_to_send
                 
                 # Call the model
+                print("🔥🔥🔥🔥🔥🔥🔥messages_to_send: ", messages_to_send)
                 response = self.client.chat.completions.create(
                     model=self.model,
                     messages=messages_to_send,
