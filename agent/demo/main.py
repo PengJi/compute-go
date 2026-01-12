@@ -22,9 +22,9 @@ logger = logging.getLogger(__name__)
 
 def print_section(title: str):
     """Print a formatted section header"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print(f"  {title}")
-    print("="*80)
+    print("=" * 80)
 
 
 def print_result(result: dict):
@@ -33,14 +33,14 @@ def print_result(result: dict):
         print("\n✅ Task completed successfully!")
         if result.get('final_answer'):
             print("\n📝 Final Answer:")
-            print("-"*40)
+            print("-" * 40)
             print(result['final_answer'])
     else:
         print("\n❌ Task failed!")
         if result.get('error'):
             print(f"Error: {result['error']}")
     
-    print(f"\n📊 Statistics:")
+    print("\n📊 Statistics:")
     print(f"  - Iterations: {result.get('iterations', 0)}")
     print(f"  - Tool calls: {len(result.get('tool_calls', []))}")
     
@@ -48,7 +48,7 @@ def print_result(result: dict):
         print(f"\n💾 Trajectory saved to: {result['trajectory_file']}")
     
     if result.get('todo_list'):
-        print(f"\n📋 Final TODO List:")
+        print("\n📋 Final TODO List:")
         for item in result['todo_list']:
             status_emoji = {
                 'pending': '⏳',
@@ -60,7 +60,7 @@ def print_result(result: dict):
     
     # Show tool call summary
     if result.get('tool_calls'):
-        print(f"\n🔧 Tool Call Summary:")
+        print("\n🔧 Tool Call Summary:")
         tool_summary = {}
         for call in result['tool_calls']:
             tool_name = call.tool_name
@@ -431,9 +431,9 @@ def main():
         # Run the sample task
         task = get_sample_task()
         print("\n📋 Running sample task:")
-        print("-"*60)
+        print("-" * 60)
         print(task)
-        print("-"*60)
+        print("-" * 60)
         
         result = execute_single_task(task, config, verbose=args.verbose)
         if result:

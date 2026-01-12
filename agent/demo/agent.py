@@ -828,6 +828,7 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
                 
                 # Check for final answer
                 if message.content and "FINAL ANSWER:" in message.content:
+                    print("🎯🎯🎯🎯🎯🎯: ", message.content)
                     final_answer = message.content.split("FINAL ANSWER:")[1].strip()
                     logger.info(f"Final answer found: {final_answer[:100]}...")
                     self.conversation_history.append(message.model_dump())
@@ -837,6 +838,7 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
                 
                 # Handle tool calls
                 if hasattr(message, 'tool_calls') and message.tool_calls:
+                    print("🧨🧨🧨🧨🧨🧨🧨message.tool_calls: ", message.content)
                     self.conversation_history.append(message.model_dump())
                     
                     for tool_call in message.tool_calls:
@@ -929,6 +931,7 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
                         })
                     
                 elif message.content:
+                    print("♨️♨️♨️♨️♨️♨️♨️message.content: ", message.content)
                     # Regular assistant message
                     self.conversation_history.append(message.model_dump())
                     
