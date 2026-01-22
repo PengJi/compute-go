@@ -60,9 +60,14 @@ class GraphRAGIndexer:
     
     def __init__(self, config: GraphRAGConfig):
         self.config = config
-        self.client = OpenAI(api_key=config.llm_api_key)
-        self.embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
         
+        # Initialize OpenAI client with optional base_url
+        client_kwargs = {"api_key": config.llm_api_key}
+        client_kwargs["base_url"] = config.base_url
+
+        self.client = OpenAI(**client_kwargs)
+        self.embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+
         # Knowledge graph components
         self.entities: Dict[str, Entity] = {}
         self.relationships: List[Relationship] = []
@@ -214,10 +219,10 @@ class GraphRAGIndexer:
             self.graph.add_node(entity_id, **asdict(entity))
         
         for rel in self.relationships:
-            self.graph.add_edge(rel.source, rel.target, 
-                              type=rel.type, 
-                              description=rel.description,
-                              weight=rel.weight)
+            self.graph.add_edge(rel.source, rel.target,
+                                type=rel.type,
+                                description=rel.description,
+                                weight=rel.weight)
         
         logger.info(f"Built graph with {len(self.entities)} entities and {len(self.relationships)} relationships")
     

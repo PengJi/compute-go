@@ -39,9 +39,14 @@ class RaptorIndexer:
     
     def __init__(self, config: RaptorConfig):
         self.config = config
-        self.client = OpenAI(api_key=config.openai_api_key)
+        
+        # Initialize OpenAI client with optional base_url
+        client_kwargs = {"api_key": config.openai_api_key}
+        client_kwargs["base_url"] = config.base_url
+        
+        self.client = OpenAI(**client_kwargs)
         self.embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-        self.tokenizer = tiktoken.encoding_for_model(config.model_name)
+        self.tokenizer = self._get_tokenizer_for_model(config.model_name)
         
         # Tree structure
         self.nodes: Dict[str, TreeNode] = {}
@@ -50,6 +55,45 @@ class RaptorIndexer:
         # Ensure index directory exists
         self.config.index_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"Initialized RAPTOR indexer with model: {config.model_name}")
+    
+    def _get_tokenizer_for_model(self, model_name: str):
+        """Get appropriate tokenizer for the given model name."""
+        # Map model names to tiktoken encodings
+        model_to_encoding = {
+            # OpenAI models
+            "gpt-4": "cl100k_base",
+            "gpt-4-turbo": "cl100k_base",
+            "gpt-4o": "o200k_base",
+            "gpt-3.5-turbo": "cl100k_base",
+            "text-embedding-3-small": "cl100k_base",
+            "text-embedding-3-large": "cl100k_base",
+            
+            # DeepSeek models (use cl100k_base as it's compatible)
+            "deepseek-chat": "cl100k_base",
+            "deepseek-coder": "cl100k_base",
+            "deepseek-v2": "cl100k_base",
+            
+            # Other models
+            "claude-3": "cl100k_base",  # Anthropic models use different tokenizer but cl100k_base is a good approximation
+        }
+        
+        # Try to get encoding from mapping
+        encoding_name = model_to_encoding.get(model_name.lower())
+        
+        if encoding_name:
+            try:
+                return tiktoken.get_encoding(encoding_name)
+            except Exception as e:
+                logger.warning(f"Failed to get encoding {encoding_name} for model {model_name}: {e}")
+        
+        # Fallback: try encoding_for_model for OpenAI models
+        try:
+            return tiktoken.encoding_for_model(model_name)
+        except Exception as e:
+            logger.warning(f"Failed to get tokenizer for model {model_name}: {e}")
+            # Default to cl100k_base (GPT-4 tokenizer)
+            logger.info("Using cl100k_base as default tokenizer")
+            return tiktoken.get_encoding("cl100k_base")
     
     def chunk_text(self, text: str) -> List[str]:
         """Split text into chunks with overlap."""
@@ -98,7 +142,7 @@ class RaptorIndexer:
         
         # Use UMAP for dimensionality reduction if needed
         if embeddings.shape[1] > 50:
-            reducer = umap.UMAP(n_components=50, n_neighbors=min(15, n_samples-1))
+            reducer = umap.UMAP(n_components=50, n_neighbors=min(15, n_samples - 1))
             embeddings_reduced = reducer.fit_transform(embeddings)
         else:
             embeddings_reduced = embeddings
@@ -115,7 +159,6 @@ class RaptorIndexer:
             return node_ids
         
         # Get embeddings for nodes
-        texts = [self.nodes[nid].text for nid in node_ids]
         embeddings = np.array([self.nodes[nid].embedding for nid in node_ids])
         
         # Cluster nodes
