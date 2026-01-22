@@ -61,13 +61,10 @@ class GraphRAGIndexer:
     def __init__(self, config: GraphRAGConfig):
         self.config = config
         
-        # Initialize OpenAI client with optional base_url
-        client_kwargs = {"api_key": config.llm_api_key}
-        client_kwargs["base_url"] = config.base_url
-
-        self.client = OpenAI(**client_kwargs)
+        # Initialize client based on configuration
+        self.client = self._initialize_client(config)
         self.embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-
+        
         # Knowledge graph components
         self.entities: Dict[str, Entity] = {}
         self.relationships: List[Relationship] = []
@@ -79,6 +76,25 @@ class GraphRAGIndexer:
         self.config.cache_dir.mkdir(parents=True, exist_ok=True)
         
         logger.info(f"Initialized GraphRAG indexer with model: {config.llm_model}")
+    
+    def _initialize_client(self, config: GraphRAGConfig):
+        """Initialize OpenAI client for either remote API or local LLM service."""
+        client_kwargs = {}
+        
+        # Check if using local LLM service
+        if config.use_local_llm:
+            logger.info("Using local LLM service")
+            # For local vLLM/Ollama service, use empty API key and local base_url
+            client_kwargs["api_key"] = config.local_llm_api_key or "EMPTY"
+            client_kwargs["base_url"] = config.local_llm_base_url
+        else:
+            # For remote API (OpenAI, DeepSeek, etc.)
+            client_kwargs["api_key"] = config.llm_api_key
+            if config.base_url:
+                client_kwargs["base_url"] = config.base_url
+        
+        logger.debug(f"Client kwargs: { {k: '***' if 'key' in k.lower() else v for k, v in client_kwargs.items()} }")
+        return OpenAI(**client_kwargs)
     
     def chunk_text(self, text: str) -> List[str]:
         """Split text into chunks with overlap."""
@@ -319,13 +335,16 @@ class GraphRAGIndexer:
         merged_communities = []
         processed = set()
         
-        for i, comm_id in enumerate(self.communities.keys()):
+        # Create a list of community IDs to iterate over (avoid modifying dict during iteration)
+        community_ids = list(self.communities.keys())
+        
+        for i, comm_id in enumerate(community_ids):
             if comm_id in processed:
                 continue
             
             # Find similar communities
             similar = []
-            for j, other_id in enumerate(self.communities.keys()):
+            for j, other_id in enumerate(community_ids):
                 if i != j and similarity_matrix[i][j] > threshold:
                     similar.append(other_id)
                     processed.add(other_id)

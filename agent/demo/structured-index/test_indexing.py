@@ -7,8 +7,8 @@ from pathlib import Path
 from loguru import logger
 
 from config import get_raptor_config, get_graphrag_config
-from raptor_indexer import RaptorIndexer
-from graphrag_indexer import GraphRAGIndexer
+from indexer_raptor import RaptorIndexer
+from indexer_graphrag import GraphRAGIndexer
 from document_processor import DocumentProcessor
 
 

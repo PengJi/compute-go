@@ -9,7 +9,8 @@ from dataclasses import dataclass
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+# Try to load from 'env' file (without dot prefix)
+load_dotenv(dotenv_path="env")
 
 
 @dataclass
@@ -18,6 +19,11 @@ class RaptorConfig:
     openai_api_key: str
     model_name: str = "deepseek-chat"
     base_url: str = "https://api.deepseek.com"
+    # Local LLM configuration
+    use_local_llm: bool = False
+    local_llm_base_url: str = "http://localhost:11434/v1"
+    local_llm_api_key: str = "EMPTY"
+    # Model configuration
     embedding_model: str = "text-embedding-3-small"
     max_tokens: int = 2048
     temperature: float = 0.1
@@ -34,12 +40,17 @@ class GraphRAGConfig:
     llm_api_key: str
     llm_model: str = "deepseek-chat"
     base_url: str = "https://api.deepseek.com"
+    # Local LLM configuration
+    use_local_llm: bool = False
+    local_llm_base_url: str = "http://localhost:11434/v1"
+    local_llm_api_key: str = "EMPTY"
+    # Model configuration
     embedding_model: str = "text-embedding-3-small"
     chunk_size: int = 1200
     chunk_overlap: int = 100
     max_knowledge_triples: int = 10
     community_detection_algorithm: str = "leiden"
-    summarization_model: str = "deepseek-chat"
+    summarization_model: str = "qwen3:8b"
     index_dir: Path = Path("indexes/graphrag")
     cache_dir: Path = Path("cache/graphrag")
 
@@ -58,8 +69,14 @@ def get_raptor_config() -> RaptorConfig:
     """Get RAPTOR configuration from environment."""
     return RaptorConfig(
         openai_api_key=os.getenv("OPENAI_API_KEY", ""),
-        model_name=os.getenv("RAPTOR_MODEL", "deepseek-chat"),
+        # model_name="qwen3:0.6b",
+        model_name="deepseek-chat",
         base_url=os.getenv("RAPTOR_BASE_URL", "https://api.deepseek.com"),
+        # Local LLM configuration
+        use_local_llm=False,
+        local_llm_base_url="http://localhost:11434/v1",
+        local_llm_api_key="",
+        # Model configuration
         embedding_model=os.getenv("RAPTOR_EMBEDDING_MODEL", "text-embedding-3-small"),
         max_tokens=int(os.getenv("RAPTOR_MAX_TOKENS", "2048")),
         temperature=float(os.getenv("RAPTOR_TEMPERATURE", "0.1")),
@@ -72,16 +89,24 @@ def get_raptor_config() -> RaptorConfig:
 
 def get_graphrag_config() -> GraphRAGConfig:
     """Get GraphRAG configuration from environment."""
+    
     return GraphRAGConfig(
         llm_api_key=os.getenv("OPENAI_API_KEY", ""),
-        llm_model=os.getenv("GRAPHRAG_MODEL", "deepseek-chat"),
+        # llm_model="qwen3:8b",
+        llm_model="deepseek-chat",
         base_url=os.getenv("GRAPHRAG_BASE_URL", "https://api.deepseek.com"),
+        # Local LLM configuration
+        use_local_llm=False,
+        local_llm_base_url="http://localhost:11434/v1",
+        local_llm_api_key="",
+        # Model configuration
         embedding_model=os.getenv("GRAPHRAG_EMBEDDING_MODEL", "text-embedding-3-small"),
         chunk_size=int(os.getenv("GRAPHRAG_CHUNK_SIZE", "1200")),
         chunk_overlap=int(os.getenv("GRAPHRAG_CHUNK_OVERLAP", "100")),
         max_knowledge_triples=int(os.getenv("GRAPHRAG_MAX_TRIPLES", "10")),
         community_detection_algorithm=os.getenv("GRAPHRAG_COMMUNITY_ALG", "leiden"),
-        summarization_model=os.getenv("GRAPHRAG_SUMMARY_MODEL", "deepseek-chat")
+        # summarization_model="qwen3:8b"
+        summarization_model="deepseek-chat"
     )
 
 

@@ -40,11 +40,8 @@ class RaptorIndexer:
     def __init__(self, config: RaptorConfig):
         self.config = config
         
-        # Initialize OpenAI client with optional base_url
-        client_kwargs = {"api_key": config.openai_api_key}
-        client_kwargs["base_url"] = config.base_url
-        
-        self.client = OpenAI(**client_kwargs)
+        # Initialize client based on configuration
+        self.client = self._initialize_client(config)
         self.embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
         self.tokenizer = self._get_tokenizer_for_model(config.model_name)
         
@@ -55,6 +52,25 @@ class RaptorIndexer:
         # Ensure index directory exists
         self.config.index_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"Initialized RAPTOR indexer with model: {config.model_name}")
+    
+    def _initialize_client(self, config: RaptorConfig):
+        """Initialize OpenAI client for either remote API or local LLM service."""
+        client_kwargs = {}
+        
+        # Check if using local LLM service
+        if config.use_local_llm:
+            logger.info("Using local LLM service")
+            # For local vLLM/Ollama service, use empty API key and local base_url
+            client_kwargs["api_key"] = config.local_llm_api_key or "EMPTY"
+            client_kwargs["base_url"] = config.local_llm_base_url
+        else:
+            # For remote API (OpenAI, DeepSeek, etc.)
+            client_kwargs["api_key"] = config.openai_api_key
+            if config.base_url:
+                client_kwargs["base_url"] = config.base_url
+        
+        logger.debug(f"Client kwargs: { {k: '***' if 'key' in k.lower() else v for k, v in client_kwargs.items()} }")
+        return OpenAI(**client_kwargs)
     
     def _get_tokenizer_for_model(self, model_name: str):
         """Get appropriate tokenizer for the given model name."""
@@ -73,8 +89,33 @@ class RaptorIndexer:
             "deepseek-coder": "cl100k_base",
             "deepseek-v2": "cl100k_base",
             
-            # Other models
-            "claude-3": "cl100k_base",  # Anthropic models use different tokenizer but cl100k_base is a good approximation
+            # Qwen models (commonly used with local LLM)
+            "qwen3:0.6b": "cl100k_base",
+            "qwen3:8b": "cl100k_base",
+            "qwen3:14b": "cl100k_base",
+            "qwen3:32b": "cl100k_base",
+            "qwen2.5:0.5b": "cl100k_base",
+            "qwen2.5:1.5b": "cl100k_base",
+            "qwen2.5:3b": "cl100k_base",
+            "qwen2.5:7b": "cl100k_base",
+            "qwen2.5:14b": "cl100k_base",
+            "qwen2.5:32b": "cl100k_base",
+            "qwen2.5:72b": "cl100k_base",
+            
+            # Llama models
+            "llama3.1:latest": "cl100k_base",
+            "llama3.2:latest": "cl100k_base",
+            "llama3:latest": "cl100k_base",
+            "llama2:latest": "cl100k_base",
+            
+            # Other common local models
+            "deepseek-coder:6.7b": "cl100k_base",
+            "mistral:latest": "cl100k_base",
+            "mixtral:latest": "cl100k_base",
+            "codellama:latest": "cl100k_base",
+            
+            # Anthropic models (approximation)
+            "claude-3": "cl100k_base",
         }
         
         # Try to get encoding from mapping
@@ -91,8 +132,8 @@ class RaptorIndexer:
             return tiktoken.encoding_for_model(model_name)
         except Exception as e:
             logger.warning(f"Failed to get tokenizer for model {model_name}: {e}")
-            # Default to cl100k_base (GPT-4 tokenizer)
-            logger.info("Using cl100k_base as default tokenizer")
+            # Default to cl100k_base (GPT-4 tokenizer) for local models
+            logger.info(f"Using cl100k_base as default tokenizer for model: {model_name}")
             return tiktoken.get_encoding("cl100k_base")
     
     def chunk_text(self, text: str) -> List[str]:
@@ -135,14 +176,20 @@ class RaptorIndexer:
     def cluster_nodes(self, embeddings: np.ndarray, min_clusters: int = 2, max_clusters: int = 10) -> np.ndarray:
         """Cluster embeddings using Gaussian Mixture Model."""
         n_samples = len(embeddings)
-        n_clusters = min(max(min_clusters, n_samples // 5), min(max_clusters, n_samples))
         
         if n_samples < 2:
             return np.zeros(n_samples)
         
+        # Ensure we have at least 2 clusters for GMM to work properly
+        n_clusters = min(max(min_clusters, n_samples // 5), min(max_clusters, n_samples))
+        n_clusters = max(2, n_clusters)  # Ensure at least 2 clusters
+        
         # Use UMAP for dimensionality reduction if needed
-        if embeddings.shape[1] > 50:
-            reducer = umap.UMAP(n_components=50, n_neighbors=min(15, n_samples - 1))
+        # Skip UMAP for small sample sizes as it doesn't work well
+        if embeddings.shape[1] > 50 and n_samples > 10:
+            # Ensure n_neighbors is at least 2 and less than n_samples
+            n_neighbors = max(2, min(15, n_samples - 1))
+            reducer = umap.UMAP(n_components=min(50, n_samples - 1), n_neighbors=n_neighbors)
             embeddings_reduced = reducer.fit_transform(embeddings)
         else:
             embeddings_reduced = embeddings
