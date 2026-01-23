@@ -21,6 +21,8 @@ import tempfile
 import shutil
 from pathlib import Path
 
+from tools import get_tool_definitions
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -291,155 +293,7 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
         if hint_parts:
             return "\n".join(hint_parts)
         return None
-    
-    def _get_tools_description(self) -> List[Dict[str, Any]]:
-        """Get tool descriptions for the model"""
-        tools = [
-            {
-                "type": "function",
-                "function": {
-                    "name": "read_file",
-                    "description": "Read the contents of a text file. Returns error for binary files. Supports partial reading for large files.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "Path to the file to read (absolute or relative to current directory)"
-                            },
-                            "begin_line": {
-                                "type": "integer",
-                                "description": "Optional: Line number to start reading from (1-based indexing). E.g., begin_line=10 starts from line 10."
-                            },
-                            "number_lines": {
-                                "type": "integer",
-                                "description": "Optional: Number of lines to read from begin_line. E.g., number_lines=50 reads 50 lines."
-                            }
-                        },
-                        "required": ["file_path"]
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "write_file",
-                    "description": "Write content to a file (creates or overwrites)",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "Path to the file to write"
-                            },
-                            "content": {
-                                "type": "string",
-                                "description": "Content to write to the file"
-                            }
-                        },
-                        "required": ["file_path", "content"]
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "code_interpreter",
-                    "description": "Execute Python code in a restricted environment",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "code": {
-                                "type": "string",
-                                "description": "Python code to execute"
-                            }
-                        },
-                        "required": ["code"]
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "execute_command",
-                    "description": "Execute a shell command in the current directory",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "command": {
-                                "type": "string",
-                                "description": "Shell command to execute"
-                            },
-                            "working_dir": {
-                                "type": "string",
-                                "description": "Optional working directory for the command (defaults to current directory)"
-                            }
-                        },
-                        "required": ["command"]
-                    }
-                }
-            }
-        ]
         
-        # Add TODO management tools if enabled
-        if self.config.enable_todo_list:
-            tools.extend([
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "rewrite_todo_list",
-                        "description": "Rewrite the TODO list with new pending items (keeps completed/cancelled items)",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "items": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    },
-                                    "description": "List of new TODO items to add as pending"
-                                }
-                            },
-                            "required": ["items"]
-                        }
-                    }
-                },
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "update_todo_status",
-                        "description": "Update the status of existing TODO items",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "updates": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "id": {
-                                                "type": "integer",
-                                                "description": "TODO item ID"
-                                            },
-                                            "status": {
-                                                "type": "string",
-                                                "enum": ["pending", "in_progress", "completed", "cancelled"],
-                                                "description": "New status for the item"
-                                            }
-                                        },
-                                        "required": ["id", "status"]
-                                    },
-                                    "description": "List of TODO items to update with their new status"
-                                }
-                            },
-                            "required": ["updates"]
-                        }
-                    }
-                }
-            ])
-        
-        return tools
-    
     def _execute_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Tuple[Any, Optional[str]]:
         """
         Execute a tool and return the result with detailed error information
@@ -818,7 +672,7 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
                 response = self.client.chat.completions.create(
                     model=self.model,
                     messages=messages_to_send,
-                    tools=self._get_tools_description(),
+                    tools=get_tool_definitions(),
                     tool_choice="auto",
                     temperature=0.3,
                     max_tokens=8192

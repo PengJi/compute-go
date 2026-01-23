@@ -4,3 +4,5 @@ target
 vendor
 
 cover
+
+*.pyc

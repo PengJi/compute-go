@@ -341,6 +341,71 @@ def demo_comparison():
     print("\n💡 System hints typically lead to more efficient task completion!")
 
 
+async def build_indexes(file_path: Path, index_type: str = "both"):
+    """Build RAPTOR and/or GraphRAG indexes from a document."""
+    logger.info(f"Building {index_type} index(es) from {file_path}")
+    
+    # Process document
+    processor = DocumentProcessor()
+    text = await processor.process_file(file_path)
+    logger.info(f"Processed document: {len(text)} characters")
+    
+    # Build RAPTOR index
+    if index_type in ["raptor", "both"]:
+        logger.info("Building RAPTOR tree index...")
+        raptor_config = get_raptor_config()
+        raptor = RaptorIndexer(raptor_config)
+        raptor.build_index(text)
+        raptor.save_index()
+        stats = raptor.get_tree_statistics()
+        logger.info(f"RAPTOR index built: {stats}")
+    
+    # Build GraphRAG index
+    if index_type in ["graphrag", "both"]:
+        logger.info("Building GraphRAG knowledge graph...")
+        graphrag_config = get_graphrag_config()
+        graphrag = GraphRAGIndexer(graphrag_config)
+        graphrag.build_knowledge_graph(text)
+        graphrag.detect_communities()
+        graphrag.hierarchical_summarization()
+        graphrag.save_index()
+        stats = graphrag.get_graph_statistics()
+        logger.info(f"GraphRAG index built: {stats}")
+    
+    logger.info("Indexing complete!")
+
+
+async def query_indexes(query: str, index_type: str = "both", top_k: int = 5):
+    """Query RAPTOR and/or GraphRAG indexes."""
+    results = {}
+    
+    # Query RAPTOR
+    if index_type in ["raptor", "both"]:
+        try:
+            raptor_config = get_raptor_config()
+            raptor = RaptorIndexer(raptor_config)
+            raptor.load_index()
+            raptor_results = raptor.search(query, top_k)
+            results["raptor"] = raptor_results
+            logger.info(f"RAPTOR returned {len(raptor_results)} results")
+        except Exception as e:
+            logger.error(f"Error querying RAPTOR: {e}")
+    
+    # Query GraphRAG
+    if index_type in ["graphrag", "both"]:
+        try:
+            graphrag_config = get_graphrag_config()
+            graphrag = GraphRAGIndexer(graphrag_config)
+            graphrag.load_index()
+            graphrag_results = graphrag.search(query, top_k)
+            results["graphrag"] = graphrag_results
+            logger.info(f"GraphRAG returned {len(graphrag_results)} results")
+        except Exception as e:
+            logger.error(f"Error querying GraphRAG: {e}")
+    
+    return results
+
+
 def main():
     """Main function with command-line argument support"""
     parser = argparse.ArgumentParser(

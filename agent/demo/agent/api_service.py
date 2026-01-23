@@ -233,9 +233,9 @@ async def query_index(request: QueryRequest):
             
             loop = asyncio.get_event_loop()
             raptor_results = await loop.run_in_executor(
-                executor, 
-                raptor_indexer.search, 
-                request.query, 
+                executor,
+                raptor_indexer.search,
+                request.query,
                 request.top_k
             )
             results = raptor_results

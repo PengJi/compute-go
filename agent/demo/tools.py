@@ -3,9 +3,16 @@
 import json
 import logging
 import requests
+import sys
+import os
+from pathlib import Path
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
+
 from config import KnowledgeBaseConfig, KnowledgeBaseType
+from structured_index.agent.indexer_raptor import RaptorIndexer
+from structured_index.agent.indexer_graphrag import GraphRAGIndexer
+from structured_index.agent.config import get_raptor_config, get_graphrag_config
 
 
 logger = logging.getLogger(__name__)
@@ -130,62 +137,9 @@ class KnowledgeBaseTools:
         except requests.exceptions.RequestException as e:
             logger.error(f"Error connecting to local retrieval pipeline: {e}")
             return []
-    
-    def _search_dify(self, query: str) -> List[Dict[str, Any]]:
-        """Search using Dify API"""
-        if not self.config.dify_api_key:
-            logger.error("Dify API key not configured")
-            return []
-        
-        try:
-            headers = {
-                "Authorization": f"Bearer {self.config.dify_api_key}",
-                "Content-Type": "application/json"
-            }
-            
-            payload = {
-                "query": query,
-                "top_k": self.config.dify_top_k
-            }
-            
-            if self.config.dify_dataset_id:
-                payload["dataset_id"] = self.config.dify_dataset_id
-            
-            response = requests.post(
-                f"{self.config.dify_base_url}/datasets/search",
-                headers=headers,
-                json=payload
-            )
-            response.raise_for_status()
-            
-            results = []
-            data = response.json()
-            
-            for item in data.get("data", {}).get("records", []):
-                doc_id = item.get("document_id", "")
-                chunk_id = item.get("segment_id", f"{doc_id}_chunk_{len(results)}")
-                
-                result = SearchResult(
-                    doc_id=doc_id,
-                    chunk_id=chunk_id,
-                    text=item.get("content", ""),
-                    score=item.get("score", 0.0),
-                    metadata=item.get("metadata", {})
-                )
-                results.append(result.to_dict())
-            
-            logger.info(f"Dify search returned {len(results)} results")
-            return results
-            
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Error connecting to Dify API: {e}")
-            return []
-    
+     
     def _search_raptor(self, query: str) -> List[Dict[str, Any]]:
         """Search using RAPTOR tree-based index via function call"""
-        if not RAPTOR_AVAILABLE:
-            logger.warning("RAPTOR modules not available, falling back to HTTP API")
-            return self._search_raptor_via_http(query)
         
         try:
             # Initialize RAPTOR indexer with configuration
@@ -284,7 +238,83 @@ class KnowledgeBaseTools:
             return []
     
     def _search_graphrag(self, query: str) -> List[Dict[str, Any]]:
-        """Search using GraphRAG knowledge graph index"""
+        """Search using GraphRAG knowledge graph index via direct function call"""
+        
+        try:
+            graphrag_config = get_graphrag_config()
+            
+            # Override configuration from knowledge base config if needed
+            if hasattr(self.config, 'graphrag_model_name'):
+                graphrag_config.llm_model = self.config.graphrag_model_name
+            if hasattr(self.config, 'graphrag_base_url'):
+                graphrag_config.base_url = self.config.graphrag_base_url
+            if hasattr(self.config, 'graphrag_search_type'):
+                search_type = self.config.graphrag_search_type
+            else:
+                search_type = "hybrid"
+            
+            # Create GraphRAG indexer instance
+            graphrag_indexer = GraphRAGIndexer(graphrag_config)
+            
+            # Load the index if it exists
+            index_path = graphrag_config.index_dir / "graphrag_index.pkl"
+            if index_path.exists():
+                graphrag_indexer.load_index(index_path)
+            else:
+                logger.warning(f"GraphRAG index not found at {index_path}")
+                return self._search_graphrag_via_http(query)
+            
+            # Perform search using function call
+            search_results = graphrag_indexer.search(
+                query,
+                top_k=self.config.graphrag_top_k,
+                search_type=search_type
+            )
+            
+            # Convert results to standard format
+            results = []
+            for i, item in enumerate(search_results):
+                result_type = item.get("type", "unknown")
+                
+                if result_type == "entity":
+                    doc_id = item.get("id", f"entity_{i}")
+                    chunk_id = f"{doc_id}_{item.get('entity_type', 'unknown')}"
+                    text_content = f"{item.get('name', '')}. {item.get('description', '')}"
+                    metadata = {
+                        "type": "entity",
+                        "entity_type": item.get("entity_type"),
+                        "related_entities": item.get("related_entities", [])
+                    }
+                else:  # community
+                    doc_id = item.get("id", f"community_{i}")
+                    chunk_id = f"{doc_id}_level_{item.get('level', 0)}"
+                    text_content = item.get("summary", "")
+                    metadata = {
+                        "type": "community",
+                        "level": item.get("level", 0),
+                        "entity_count": item.get("entity_count", 0),
+                        "sample_entities": item.get("sample_entities", [])
+                    }
+                
+                result = SearchResult(
+                    doc_id=doc_id,
+                    chunk_id=chunk_id,
+                    text=text_content,
+                    score=item.get("score", 0.0),
+                    metadata={**metadata, "source": "graphrag"}
+                )
+                results.append(result.to_dict())
+            
+            logger.info(f"GraphRAG search (function call) returned {len(results)} results")
+            return results
+            
+        except Exception as e:
+            logger.error(f"Error in GraphRAG function call search: {e}")
+            # Fall back to HTTP API
+            return self._search_graphrag_via_http(query)
+    
+    def _search_graphrag_via_http(self, query: str) -> List[Dict[str, Any]]:
+        """Search using GraphRAG knowledge graph index via HTTP API (fallback)"""
         try:
             response = requests.post(
                 f"{self.config.graphrag_base_url}/query",
@@ -333,11 +363,11 @@ class KnowledgeBaseTools:
                 )
                 results.append(result.to_dict())
             
-            logger.info(f"GraphRAG search returned {len(results)} results")
+            logger.info(f"GraphRAG search (HTTP) returned {len(results)} results")
             return results
             
         except requests.exceptions.RequestException as e:
-            logger.error(f"Error connecting to GraphRAG index: {e}")
+            logger.error(f"Error connecting to GraphRAG index via HTTP: {e}")
             return []
     
     def get_document(self, doc_id: str) -> Dict[str, Any]:
@@ -386,33 +416,7 @@ class KnowledgeBaseTools:
             logger.error(f"Error getting document from local pipeline: {e}")
             return {"error": str(e)}
     
-    def _get_document_dify(self, doc_id: str) -> Dict[str, Any]:
-        """Get document from Dify"""
-        if not self.config.dify_api_key:
-            return {"error": "Dify API key not configured"}
-        
-        try:
-            headers = {
-                "Authorization": f"Bearer {self.config.dify_api_key}",
-                "Content-Type": "application/json"
-            }
-            
-            response = requests.get(
-                f"{self.config.dify_base_url}/documents/{doc_id}",
-                headers=headers
-            )
-            
-            if response.status_code == 404:
-                return {"error": f"Document {doc_id} not found"}
-            
-            response.raise_for_status()
-            return response.json()
-            
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Error getting document from Dify: {e}")
-            return {"error": str(e)}
-    
-    def _get_document_raptor(self, doc_id: str) -> Dict[str, Any]:
+    def _get_document_raptor_via_http(self, doc_id: str) -> Dict[str, Any]:
         """Get document/node from RAPTOR index"""
         try:
             # For RAPTOR, we perform a targeted search for the specific node
@@ -449,7 +453,7 @@ class KnowledgeBaseTools:
             logger.error(f"Error getting document from RAPTOR: {e}")
             return {"error": str(e)}
     
-    def _get_document_graphrag(self, doc_id: str) -> Dict[str, Any]:
+    def _get_document_graphrag_via_http(self, doc_id: str) -> Dict[str, Any]:
         """Get entity or community from GraphRAG index"""
         try:
             # For GraphRAG, we perform a targeted search for the specific entity/community
@@ -516,6 +520,142 @@ class KnowledgeBaseTools:
 def get_tool_definitions() -> List[Dict[str, Any]]:
     """Get OpenAI-format tool definitions"""
     return [
+        {
+            "type": "function",
+            "function": {
+                "name": "read_file",
+                "description": "Read the contents of a text file. Returns error for binary files. Supports partial reading for large files.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "file_path": {
+                            "type": "string",
+                            "description": "Path to the file to read (absolute or relative to current directory)"
+                        },
+                        "begin_line": {
+                            "type": "integer",
+                            "description": "Optional: Line number to start reading from (1-based indexing). E.g., begin_line=10 starts from line 10."
+                        },
+                        "number_lines": {
+                            "type": "integer",
+                            "description": "Optional: Number of lines to read from begin_line. E.g., number_lines=50 reads 50 lines."
+                        }
+                    },
+                    "required": ["file_path"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "write_file",
+                "description": "Write content to a file (creates or overwrites)",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "file_path": {
+                            "type": "string",
+                            "description": "Path to the file to write"
+                        },
+                        "content": {
+                            "type": "string",
+                            "description": "Content to write to the file"
+                        }
+                    },
+                    "required": ["file_path", "content"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "code_interpreter",
+                "description": "Execute Python code in a restricted environment",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "code": {
+                            "type": "string",
+                            "description": "Python code to execute"
+                        }
+                    },
+                    "required": ["code"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "execute_command",
+                "description": "Execute a shell command in the current directory",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "command": {
+                            "type": "string",
+                            "description": "Shell command to execute"
+                        },
+                        "working_dir": {
+                            "type": "string",
+                            "description": "Optional working directory for the command (defaults to current directory)"
+                        }
+                    },
+                    "required": ["command"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "rewrite_todo_list",
+                "description": "Rewrite the TODO list with new pending items (keeps completed/cancelled items)",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "description": "List of new TODO items to add as pending"
+                        }
+                    },
+                    "required": ["items"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "update_todo_status",
+                "description": "Update the status of existing TODO items",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "updates": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "description": "TODO item ID"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": ["pending", "in_progress", "completed", "cancelled"],
+                                        "description": "New status for the item"
+                                    }
+                                },
+                                "required": ["id", "status"]
+                            },
+                            "description": "List of TODO items to update with their new status"
+                        }
+                    },
+                    "required": ["updates"]
+                }
+            }
+        },
         {
             "type": "function",
             "function": {

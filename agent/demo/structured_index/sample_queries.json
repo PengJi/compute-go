@@ -1,0 +1,23 @@
+[
+  "What is the MOV instruction and how does it work?",
+  "Explain the difference between MOVSX and MOVZX",
+  "What are the arithmetic instructions in x86?",
+  "What are the general-purpose registers in 64-bit mode?",
+  "How many general-purpose registers are available in x86-64?",
+  "What is the purpose of control registers CR0-CR4?",
+  "What are the different memory models in IA-32 architecture?",
+  "Explain the flat memory model",
+  "What is the difference between segmented and flat memory models?",
+  "What are SSE instructions?",
+  "What is the difference between SSE and AVX?",
+  "How do MOVAPS and MOVUPS differ?",
+  "What does the CPUID instruction do?",
+  "How do I read the time-stamp counter?",
+  "What are model specific registers (MSRs)?",
+  "How do string instructions work in x86?",
+  "What are the different operating modes in IA-32?",
+  "Explain the instruction format in Intel 64 architecture",
+  "What is the relationship between MOV and XCHG instructions?",
+  "How are ADD and SUB instructions related?",
+  "Which instructions affect the FLAGS register?"
+]
