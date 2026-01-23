@@ -6,10 +6,10 @@ import asyncio
 from pathlib import Path
 from loguru import logger
 
-from config import get_raptor_config, get_graphrag_config
-from indexer_raptor import RaptorIndexer
-from indexer_graphrag import GraphRAGIndexer
-from document_processor import DocumentProcessor
+from agent.config import get_raptor_config, get_graphrag_config
+from agent.indexer_raptor import RaptorIndexer
+from agent.indexer_graphrag import GraphRAGIndexer
+from agent.document_processor import DocumentProcessor
 
 
 # Sample Intel x86/x64 instruction documentation text
@@ -118,9 +118,9 @@ async def test_indexing():
     logger.info("Starting structured indexing test...")
     
     # Test RAPTOR indexing
-    logger.info("\n" + "="*60)
+    logger.info("\n" + "=" * 60)
     logger.info("Testing RAPTOR Tree-Based Indexing")
-    logger.info("="*60)
+    logger.info("=" * 60)
     
     raptor_config = get_raptor_config()
     raptor = RaptorIndexer(raptor_config)
@@ -149,9 +149,9 @@ async def test_indexing():
     raptor.save_index()
     
     # Test GraphRAG indexing
-    logger.info("\n" + "="*60)
+    logger.info("\n" + "=" * 60)
     logger.info("Testing GraphRAG Knowledge Graph Indexing")
-    logger.info("="*60)
+    logger.info("=" * 60)
     
     graphrag_config = get_graphrag_config()
     graphrag = GraphRAGIndexer(graphrag_config)
@@ -179,9 +179,9 @@ async def test_indexing():
     # Save index
     graphrag.save_index()
     
-    logger.info("\n" + "="*60)
+    logger.info("\n" + "=" * 60)
     logger.info("Test completed successfully!")
-    logger.info("="*60)
+    logger.info("=" * 60)
 
 
 if __name__ == "__main__":

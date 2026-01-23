@@ -19,7 +19,7 @@ from openai import OpenAI
 from sentence_transformers import SentenceTransformer
 from loguru import logger
 
-from config import RaptorConfig
+from agent.config import RaptorConfig
 
 
 @dataclass

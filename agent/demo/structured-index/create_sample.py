@@ -282,9 +282,9 @@ if __name__ == "__main__":
     print("\nCreating sample queries...")
     queries = create_sample_queries()
     
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Sample data created successfully!")
-    print("="*60)
+    print("=" * 60)
     
     print("\nTo test the system:")
     print("1. Build indexes:")

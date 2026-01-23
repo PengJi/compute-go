@@ -20,7 +20,7 @@ from loguru import logger
 import re
 from collections import defaultdict
 
-from config import GraphRAGConfig
+from agent.config import GraphRAGConfig
 
 
 @dataclass

@@ -8,11 +8,11 @@ from pathlib import Path
 from loguru import logger
 import sys
 
-from config import get_raptor_config, get_graphrag_config
-from indexer_raptor import RaptorIndexer
-from indexer_graphrag import GraphRAGIndexer
-from document_processor import DocumentProcessor
-from api_service import run_server
+from agent.config import get_raptor_config, get_graphrag_config
+from agent.indexer_raptor import RaptorIndexer
+from agent.indexer_graphrag import GraphRAGIndexer
+from agent.document_processor import DocumentProcessor
+from agent.api_service import run_server
 
 
 async def build_indexes(file_path: Path, index_type: str = "both"):
