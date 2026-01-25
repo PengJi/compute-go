@@ -6,6 +6,7 @@ import os
 import sys
 from agent import SystemHintAgent, SystemHintConfig, TodoStatus
 
+
 def test_basic_functionality():
     """Test basic agent functionality without API calls"""
     print("Testing System-Hint Agent components...")

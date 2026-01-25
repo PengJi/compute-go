@@ -5,12 +5,18 @@ Supports command-line tasks and interactive mode
 
 import os
 import sys
-import json
 import logging
 import argparse
-from datetime import datetime
+import asyncio
 from pathlib import Path
-from agent import SystemHintAgent, SystemHintConfig, TodoStatus
+
+from agent.agent import SystemHintAgent, SystemHintConfig
+from agent.config import get_raptor_config, get_graphrag_config
+from agent.indexer_raptor import RaptorIndexer
+from agent.indexer_graphrag import GraphRAGIndexer
+from agent.document_processor import DocumentProcessor
+from agent.api_service import run_server
+
 
 # Configure logging
 logging.basicConfig(
@@ -411,6 +417,25 @@ def main():
     parser = argparse.ArgumentParser(
         description="System-Hint Enhanced AI Agent - Advanced trajectory management with system hints"
     )
+    subparsers = parser.add_subparsers(dest="command", help="Command to run")
+
+        # Build command
+    build_parser = subparsers.add_parser("build", help="Build index from document")
+    build_parser.add_argument("file", type=str, help="Path to document file")
+    build_parser.add_argument("--type", choices=["raptor", "graphrag", "both"], 
+                            default="both", help="Type of index to build")
+    
+    # Query command
+    query_parser = subparsers.add_parser("query", help="Query the index")
+    query_parser.add_argument("query", type=str, help="Search query")
+    query_parser.add_argument("--type", choices=["raptor", "graphrag", "both"],
+                            default="both", help="Index to query")
+    query_parser.add_argument("--top-k", type=int, default=5, 
+                            help="Number of results to return")
+    
+    # Server command
+    server_parser = subparsers.add_parser("serve", help="Run API server")
+    
     
     parser.add_argument(
         "--mode",
@@ -519,6 +544,28 @@ def main():
             demo_tool_loop_prevention()
             input("\nPress Enter to continue...")
             demo_comparison()
+
+    elif args.command == "build":
+        asyncio.run(build_indexes(Path(args.file), args.type))
+
+    elif args.command == "query":
+        results = asyncio.run(query_indexes(args.query, args.type, args.top_k))
+        
+        # Display results
+        for index_type, index_results in results.items():
+            print(f"\n{index_type.upper()} Results:")
+            print("-" * 50)
+            for i, result in enumerate(index_results, 1):
+                print(f"\n{i}. Score: {result.get('score', 'N/A'):.3f}")
+                if 'summary' in result:
+                    print(f"   Summary: {result['summary'][:200]}...")
+                elif 'description' in result:
+                    print(f"   Description: {result['description'][:200]}...")
+                if 'level' in result:
+                    print(f"   Level: {result['level']}")
+
+    elif args.command == "serve":
+        run_server()
     
     else:  # interactive mode
         interactive_mode()

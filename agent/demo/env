@@ -6,7 +6,7 @@ OPENAI_API_KEY=your-openai-api-key-here
 RAPTOR_MODEL=qwen3:8b
 RAPTOR_BASE_URL=https://api.deepseek.com
 # Local LLM configuration for RAPTOR
-RAPTOR_USE_LOCAL_LLM=true
+RAPTOR_USE_LOCAL_LLM=false
 RAPTOR_LOCAL_LLM_BASE_URL=http://localhost:11434/v1
 RAPTOR_LOCAL_LLM_API_KEY=EMPTY
 RAPTOR_EMBEDDING_MODEL=text-embedding-3-small
@@ -22,7 +22,7 @@ RAPTOR_SUMMARY_LENGTH=200
 GRAPHRAG_MODEL=qwen3:8b
 GRAPHRAG_BASE_URL=https://api.deepseek.com
 # Local LLM configuration for GraphRAG
-GRAPHRAG_USE_LOCAL_LLM=true
+GRAPHRAG_USE_LOCAL_LLM=false
 GRAPHRAG_LOCAL_LLM_BASE_URL=http://localhost:11434/v1
 GRAPHRAG_LOCAL_LLM_API_KEY=EMPTY
 GRAPHRAG_EMBEDDING_MODEL=text-embedding-3-small

@@ -3,16 +3,13 @@
 import json
 import logging
 import requests
-import sys
-import os
-from pathlib import Path
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 
 from config import KnowledgeBaseConfig, KnowledgeBaseType
-from structured_index.agent.indexer_raptor import RaptorIndexer
-from structured_index.agent.indexer_graphrag import GraphRAGIndexer
-from structured_index.agent.config import get_raptor_config, get_graphrag_config
+from agent.indexer_raptor import RaptorIndexer
+from agent.indexer_graphrag import GraphRAGIndexer
+from agent.config import get_raptor_config, get_graphrag_config
 
 
 logger = logging.getLogger(__name__)

@@ -14,12 +14,8 @@ from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime, timedelta
-import requests
 from openai import OpenAI
 import traceback
-import tempfile
-import shutil
-from pathlib import Path
 
 from tools import get_tool_definitions
 
