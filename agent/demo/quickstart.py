@@ -22,9 +22,9 @@ def main():
         print("  3. Run: export DEEPSEEK_API_KEY='your-api-key-here'")
         return
     
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("  🚀 System-Hint Agent Quick Start")
-    print("="*60)
+    print("=" * 60)
     
     # Sample task for analyzing projects
     task = """Analyze and summarize the AI Agent projects in week1 and week2 directories:
@@ -43,9 +43,9 @@ def main():
 Use the TODO list to organize and track your analysis steps."""
     
     print("\n📋 Task:")
-    print("-"*60)
+    print("-" * 60)
     print(task)
-    print("-"*60)
+    print("-" * 60)
     
     # Create agent with all features enabled
     print("\n🔧 Initializing agent with full system hints...")
@@ -69,22 +69,22 @@ Use the TODO list to organize and track your analysis steps."""
     print(f"📁 Working directory: {agent.current_directory}")
     
     print("\n🚀 Executing task (this may take a moment)...")
-    print("-"*60)
+    print("-" * 60)
     
     # Execute the task
     result = agent.execute_task(task, max_iterations=25)
     
     # Display results
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("  📊 Results")
-    print("="*60)
+    print("=" * 60)
     
     if result.get('success'):
         print("\n✅ Task completed successfully!")
         
         if result.get('final_answer'):
             print("\n📝 Summary:")
-            print("-"*40)
+            print("-" * 40)
             answer = result['final_answer']
             # Display first 800 chars for readability
             if len(answer) > 800:
@@ -135,9 +135,9 @@ Use the TODO list to organize and track your analysis steps."""
         if total > 5:
             print(f"  ... and {total - 5} more items")
     
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("  ✨ Quick Start Complete!")
-    print("="*60)
+    print("=" * 60)
     print("\n💡 Tips:")
     print("  • Run 'python main.py' for interactive mode")
     print("  • Run 'python main.py --mode sample' to run this task again")

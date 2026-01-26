@@ -419,7 +419,7 @@ def main():
     )
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
-        # Build command
+    # Build command
     build_parser = subparsers.add_parser("build", help="Build index from document")
     build_parser.add_argument("file", type=str, help="Path to document file")
     build_parser.add_argument("--type", choices=["raptor", "graphrag", "both"], 

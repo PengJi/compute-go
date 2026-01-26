@@ -17,29 +17,11 @@ from datetime import datetime, timedelta
 from openai import OpenAI
 import traceback
 
-from tools import get_tool_definitions
+from tools import get_tool_definitions, read_file, write_file, code_interpreter, execute_command, rewrite_todo_list, update_todo_status, TodoItem, TodoStatus
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
-
-class TodoStatus(Enum):
-    """Status of a TODO item"""
-    PENDING = "pending"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
-
-
-@dataclass
-class TodoItem:
-    """Represents a single TODO item"""
-    id: int
-    content: str
-    status: TodoStatus = TodoStatus.PENDING
-    created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    updated_at: Optional[str] = None
 
 
 @dataclass
@@ -301,17 +283,47 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
         
         try:
             if tool_name == "read_file":
-                result = self._tool_read_file(**arguments)
+                result = read_file(**arguments, current_directory=self.current_directory)
             elif tool_name == "write_file":
-                result = self._tool_write_file(**arguments)
+                result = write_file(**arguments, current_directory=self.current_directory)
             elif tool_name == "code_interpreter":
-                result = self._tool_code_interpreter(**arguments)
+                result = code_interpreter(**arguments)
             elif tool_name == "execute_command":
-                result = self._tool_execute_command(**arguments)
+                result = execute_command(**arguments, current_directory=self.current_directory)
+                # Update current directory if 'cd' command was successful
+                if result.get("success") and result.get("new_directory"):
+                    self.current_directory = result["new_directory"]
             elif tool_name == "rewrite_todo_list":
-                result = self._tool_rewrite_todo_list(**arguments)
+                result = rewrite_todo_list(**arguments, todo_list=self.todo_list, next_todo_id=self.next_todo_id)
+                # Update internal state from result
+                if result["success"]:
+                    self.next_todo_id = result["next_todo_id"]
+                    # Convert dicts back to TodoItem objects
+                    self.todo_list = [
+                        TodoItem(
+                            id=item["id"],
+                            content=item["content"],
+                            status=TodoStatus(item["status"]),
+                            created_at=item["created_at"],
+                            updated_at=item["updated_at"]
+                        )
+                        for item in result["todo_list"]
+                    ]
             elif tool_name == "update_todo_status":
-                result = self._tool_update_todo_status(**arguments)
+                result = update_todo_status(**arguments, todo_list=self.todo_list)
+                # Update internal state from result
+                if result["success"]:
+                    # Convert dicts back to TodoItem objects
+                    self.todo_list = [
+                        TodoItem(
+                            id=item["id"],
+                            content=item["content"],
+                            status=TodoStatus(item["status"]),
+                            created_at=item["created_at"],
+                            updated_at=item["updated_at"]
+                        )
+                        for item in result["todo_list"]
+                    ]
             else:
                 error = f"Unknown tool: {tool_name}"
                 return {"error": error}, error
@@ -375,251 +387,6 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
             suggestions.append("Use only built-in Python modules")
         
         return " | ".join(suggestions) if suggestions else ""
-    
-    # Tool implementations
-    def _tool_read_file(self, file_path: str, begin_line: Optional[int] = None,
-                       number_lines: Optional[int] = None) -> Dict[str, Any]:
-        """Read file contents with optional line-based reading"""
-        try:
-            # Resolve path relative to current directory
-            if not os.path.isabs(file_path):
-                file_path = os.path.join(self.current_directory, file_path)
-            
-            # Check if file exists
-            if not os.path.exists(file_path):
-                raise FileNotFoundError(f"File not found: {file_path}")
-            
-            # Check if it's a binary file
-            try:
-                with open(file_path, 'rb') as f:
-                    # Read first 1024 bytes to check for binary content
-                    chunk = f.read(1024)
-                    # Check for null bytes (common in binary files)
-                    if b'\x00' in chunk:
-                        return {
-                            "success": False,
-                            "error": "Cannot read binary file. This tool only supports text files.",
-                            "file_path": file_path,
-                            "is_binary": True
-                        }
-                    # Also check if it's valid UTF-8
-                    try:
-                        chunk.decode('utf-8')
-                    except UnicodeDecodeError:
-                        return {
-                            "success": False,
-                            "error": "File is not a valid text file (encoding error).",
-                            "file_path": file_path,
-                            "is_binary": True
-                        }
-            except Exception as e:
-                # If we can't read it as binary, probably permission issue
-                raise
-            
-            # Read the file content
-            with open(file_path, 'r', encoding='utf-8') as f:
-                if begin_line is not None or number_lines is not None:
-                    # Line-based reading
-                    all_lines = f.readlines()
-                    total_lines = len(all_lines)
-                    
-                    # Calculate line range
-                    start_line = (begin_line - 1) if begin_line is not None else 0
-                    if start_line < 0:
-                        start_line = 0
-                    if start_line >= total_lines:
-                        return {
-                            "success": False,
-                            "error": f"begin_line {begin_line} is beyond file length ({total_lines} lines)",
-                            "file_path": file_path,
-                            "total_lines": total_lines
-                        }
-                    
-                    if number_lines is not None:
-                        end_line = min(start_line + number_lines, total_lines)
-                    else:
-                        end_line = total_lines
-                    
-                    # Get the requested lines
-                    selected_lines = all_lines[start_line:end_line]
-                    content = ''.join(selected_lines)
-                    
-                    # Get file info
-                    stat = os.stat(file_path)
-                    
-                    return {
-                        "success": True,
-                        "file_path": file_path,
-                        "content": content,
-                        "size_bytes": stat.st_size,
-                        "total_lines": total_lines,
-                        "begin_line": start_line + 1,  # Convert back to 1-based
-                        "end_line": end_line,
-                        "lines_read": len(selected_lines),
-                        "partial_read": True
-                    }
-                else:
-                    # Full file reading
-                    content = f.read()
-                    
-                    # Get file info
-                    stat = os.stat(file_path)
-                    
-                    return {
-                        "success": True,
-                        "file_path": file_path,
-                        "content": content,
-                        "size_bytes": stat.st_size,
-                        "lines": len(content.splitlines()),
-                        "partial_read": False
-                    }
-        except Exception as e:
-            raise
-    
-    def _tool_write_file(self, file_path: str, content: str) -> Dict[str, Any]:
-        """Write content to file"""
-        try:
-            # Resolve path relative to current directory
-            if not os.path.isabs(file_path):
-                file_path = os.path.join(self.current_directory, file_path)
-            
-            # Create directory if needed
-            os.makedirs(os.path.dirname(file_path), exist_ok=True)
-            
-            with open(file_path, 'w', encoding='utf-8') as f:
-                f.write(content)
-            
-            return {
-                "success": True,
-                "file_path": file_path,
-                "bytes_written": len(content.encode('utf-8')),
-                "lines_written": len(content.splitlines())
-            }
-        except Exception as e:
-            raise
-    
-    def _tool_code_interpreter(self, code: str) -> Dict[str, Any]:
-        """Execute Python code in restricted environment"""
-        try:
-            # Capture output
-            import io
-            import contextlib
-            
-            output_buffer = io.StringIO()
-            error_buffer = io.StringIO()
-            
-            with contextlib.redirect_stdout(output_buffer), contextlib.redirect_stderr(error_buffer):
-                exec(code)
-            
-            # Get output
-            stdout = output_buffer.getvalue()
-            stderr = error_buffer.getvalue()
-            
-            return {
-                "success": True,
-                "stdout": stdout,
-                "stderr": stderr,
-            }
-        except Exception as e:
-            raise
-    
-    def _tool_execute_command(self, command: str, working_dir: Optional[str] = None) -> Dict[str, Any]:
-        """Execute shell command"""
-        try:
-            # Use current directory if not specified
-            if working_dir is None:
-                working_dir = self.current_directory
-            elif not os.path.isabs(working_dir):
-                working_dir = os.path.join(self.current_directory, working_dir)
-            
-            # Update current directory if 'cd' command
-            if command.strip().startswith('cd '):
-                new_dir = command.strip()[3:].strip()
-                if not os.path.isabs(new_dir):
-                    new_dir = os.path.join(self.current_directory, new_dir)
-                
-                if os.path.isdir(new_dir):
-                    self.current_directory = os.path.abspath(new_dir)
-                    return {
-                        "success": True,
-                        "command": command,
-                        "output": f"Changed directory to: {self.current_directory}",
-                        "return_code": 0
-                    }
-                else:
-                    raise FileNotFoundError(f"Directory not found: {new_dir}")
-            
-            # Execute command
-            result = subprocess.run(
-                command,
-                shell=True,
-                capture_output=True,
-                text=True,
-                cwd=working_dir,
-                timeout=30
-            )
-            
-            return {
-                "success": result.returncode == 0,
-                "command": command,
-                "output": result.stdout,
-                "error": result.stderr if result.stderr else None,
-                "return_code": result.returncode,
-                "working_dir": working_dir
-            }
-        except subprocess.TimeoutExpired:
-            raise TimeoutError(f"Command timed out after 30 seconds: {command}")
-        except Exception as e:
-            raise
-    
-    def _tool_rewrite_todo_list(self, items: List[str]) -> Dict[str, Any]:
-        """Rewrite TODO list with new pending items"""
-        # Keep completed and cancelled items
-        kept_items = [
-            item for item in self.todo_list
-            if item.status in [TodoStatus.COMPLETED, TodoStatus.CANCELLED]
-        ]
-        
-        # Create new pending items
-        new_items = []
-        for content in items:
-            new_items.append(TodoItem(
-                id=self.next_todo_id,
-                content=content,
-                status=TodoStatus.PENDING
-            ))
-            self.next_todo_id += 1
-        
-        # Update TODO list
-        self.todo_list = kept_items + new_items
-        
-        return {
-            "success": True,
-            "kept_items": len(kept_items),
-            "new_items": len(new_items),
-            "total_items": len(self.todo_list)
-        }
-    
-    def _tool_update_todo_status(self, updates: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Update status of TODO items"""
-        updated_count = 0
-        
-        for update in updates:
-            item_id = update["id"]
-            new_status = TodoStatus(update["status"])
-            
-            for item in self.todo_list:
-                if item.id == item_id:
-                    item.status = new_status
-                    item.updated_at = datetime.now().isoformat()
-                    updated_count += 1
-                    break
-        
-        return {
-            "success": True,
-            "updated_items": updated_count,
-            "total_items": len(self.todo_list)
-        }
     
     def execute_task(self, task: str, max_iterations: int = 20) -> Dict[str, Any]:
         """
@@ -728,14 +495,13 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
                                     elif 'content' in result:
                                         # Handle read_file results
                                         if result.get('partial_read'):
-                                            logger.info(f"  ✅ Success: Read lines {result.get('begin_line', 1)}-{result.get('end_line', 0)} "
-                                                      f"({result.get('lines_read', 0)} lines) from {result.get('total_lines', 0)} total")
+                                            logger.info(f"  ✅ Success: Read lines {result.get('begin_line', 1)}-{result.get('end_line', 0)} ({result.get('lines_read', 0)} lines) from {result.get('total_lines', 0)} total")
                                         else:
                                             logger.info(f"  ✅ Success: Read {result.get('lines', 0)} lines, {result.get('size_bytes', 0)} bytes")
                                     elif 'file_path' in result:
                                         logger.info(f"  ✅ Success: File operation on {result['file_path']}")
                                     else:
-                                        logger.info(f"  ✅ Success: Operation completed")
+                                        logger.info("  ✅ Success: Operation completed")
                                 elif result.get('success') is False:
                                     # Handle explicit failures (like binary file detection)
                                     if result.get('is_binary'):
@@ -743,7 +509,7 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
                                     else:
                                         logger.info(f"  ⚠️ Failed: {result.get('error', 'Unknown error')[:100]}")
                                 else:
-                                    logger.info(f"  ✅ Success: Operation completed")
+                                    logger.info("  ✅ Success: Operation completed")
                             else:
                                 result_preview = str(result).replace('\n', ' ')[:150]
                                 logger.info(f"  ✅ Result: {result_preview}")

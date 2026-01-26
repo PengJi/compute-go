@@ -1,10 +1,14 @@
-"""Tools for knowledge base interaction"""
+"""Tools for knowledge base interaction and system operations"""
 
 import json
 import logging
 import requests
+import os
+import subprocess
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum
 
 from config import KnowledgeBaseConfig, KnowledgeBaseType
 from agent.indexer_raptor import RaptorIndexer
@@ -13,6 +17,40 @@ from agent.config import get_raptor_config, get_graphrag_config
 
 
 logger = logging.getLogger(__name__)
+
+
+# TODO list related classes
+class TodoStatus(str, Enum):
+    """Status of a TODO item"""
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+
+@dataclass
+class TodoItem:
+    """Represents a TODO item"""
+    id: int
+    content: str
+    status: TodoStatus
+    created_at: str = None
+    updated_at: str = None
+    
+    def __post_init__(self):
+        if self.created_at is None:
+            self.created_at = datetime.now().isoformat()
+        if self.updated_at is None:
+            self.updated_at = datetime.now().isoformat()
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "content": self.content,
+            "status": self.status.value,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at
+        }
 
 
 @dataclass
@@ -511,6 +549,285 @@ class KnowledgeBaseTools:
             "metadata": metadata or {}
         }
         self.save_document_store()
+
+
+# System tool implementations
+def read_file(file_path: str, begin_line: Optional[int] = None,
+              number_lines: Optional[int] = None, current_directory: str = ".") -> Dict[str, Any]:
+    """Read file contents with optional line-based reading"""
+    try:
+        # Resolve path relative to current directory
+        if not os.path.isabs(file_path):
+            file_path = os.path.join(current_directory, file_path)
+        
+        # Check if file exists
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+        
+        # Check if it's a binary file
+        try:
+            with open(file_path, 'rb') as f:
+                # Read first 1024 bytes to check for binary content
+                chunk = f.read(1024)
+                # Check for null bytes (common in binary files)
+                if b'\x00' in chunk:
+                    return {
+                        "success": False,
+                        "error": "Cannot read binary file. This tool only supports text files.",
+                        "file_path": file_path,
+                        "is_binary": True
+                    }
+                # Also check if it's valid UTF-8
+                try:
+                    chunk.decode('utf-8')
+                except UnicodeDecodeError:
+                    return {
+                        "success": False,
+                        "error": "File is not a valid text file (encoding error).",
+                        "file_path": file_path,
+                        "is_binary": True
+                    }
+        except Exception:
+            # If we can't read it as binary, probably permission issue
+            raise
+        
+        # Read the file content
+        with open(file_path, 'r', encoding='utf-8') as f:
+            if begin_line is not None or number_lines is not None:
+                # Line-based reading
+                all_lines = f.readlines()
+                total_lines = len(all_lines)
+                
+                # Calculate line range
+                start_line = (begin_line - 1) if begin_line is not None else 0
+                if start_line < 0:
+                    start_line = 0
+                if start_line >= total_lines:
+                    return {
+                        "success": False,
+                        "error": f"begin_line {begin_line} is beyond file length ({total_lines} lines)",
+                        "file_path": file_path,
+                        "total_lines": total_lines
+                    }
+                
+                if number_lines is not None:
+                    end_line = min(start_line + number_lines, total_lines)
+                else:
+                    end_line = total_lines
+                
+                # Get the requested lines
+                selected_lines = all_lines[start_line:end_line]
+                content = ''.join(selected_lines)
+                
+                # Get file info
+                stat = os.stat(file_path)
+                
+                return {
+                    "success": True,
+                    "file_path": file_path,
+                    "content": content,
+                    "size_bytes": stat.st_size,
+                    "total_lines": total_lines,
+                    "begin_line": start_line + 1,  # Convert back to 1-based
+                    "end_line": end_line,
+                    "lines_read": len(selected_lines),
+                    "partial_read": True
+                }
+            else:
+                # Full file reading
+                content = f.read()
+                
+                # Get file info
+                stat = os.stat(file_path)
+                
+                return {
+                    "success": True,
+                    "file_path": file_path,
+                    "content": content,
+                    "size_bytes": stat.st_size,
+                    "lines": len(content.splitlines()),
+                    "partial_read": False
+                }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "file_path": file_path
+        }
+
+
+def write_file(file_path: str, content: str, current_directory: str = ".") -> Dict[str, Any]:
+    """Write content to file"""
+    try:
+        # Resolve path relative to current directory
+        if not os.path.isabs(file_path):
+            file_path = os.path.join(current_directory, file_path)
+        
+        # Create directory if needed
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+        
+        return {
+            "success": True,
+            "file_path": file_path,
+            "bytes_written": len(content.encode('utf-8')),
+            "lines_written": len(content.splitlines())
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "file_path": file_path
+        }
+
+
+def code_interpreter(code: str) -> Dict[str, Any]:
+    """Execute Python code in restricted environment"""
+    try:
+        # Capture output
+        import io
+        import contextlib
+        
+        output_buffer = io.StringIO()
+        error_buffer = io.StringIO()
+        
+        with contextlib.redirect_stdout(output_buffer), contextlib.redirect_stderr(error_buffer):
+            exec(code)
+        
+        # Get output
+        stdout = output_buffer.getvalue()
+        stderr = error_buffer.getvalue()
+        
+        return {
+            "success": True,
+            "stdout": stdout,
+            "stderr": stderr,
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "stdout": "",
+            "stderr": str(e)
+        }
+
+
+def execute_command(command: str, working_dir: Optional[str] = None,
+                    current_directory: str = ".") -> Dict[str, Any]:
+    """Execute shell command"""
+    try:
+        # Use current directory if not specified
+        if working_dir is None:
+            working_dir = current_directory
+        elif not os.path.isabs(working_dir):
+            working_dir = os.path.join(current_directory, working_dir)
+        
+        # Update current directory if 'cd' command
+        if command.strip().startswith('cd '):
+            new_dir = command.strip()[3:].strip()
+            if not os.path.isabs(new_dir):
+                new_dir = os.path.join(current_directory, new_dir)
+            
+            if os.path.isdir(new_dir):
+                return {
+                    "success": True,
+                    "command": command,
+                    "output": f"Changed directory to: {os.path.abspath(new_dir)}",
+                    "return_code": 0,
+                    "new_directory": os.path.abspath(new_dir)
+                }
+            else:
+                raise FileNotFoundError(f"Directory not found: {new_dir}")
+        
+        # Execute command
+        result = subprocess.run(
+            command,
+            shell=True,
+            capture_output=True,
+            text=True,
+            cwd=working_dir,
+            timeout=30
+        )
+        
+        return {
+            "success": result.returncode == 0,
+            "command": command,
+            "output": result.stdout,
+            "error": result.stderr if result.stderr else None,
+            "return_code": result.returncode,
+            "working_dir": working_dir
+        }
+    except subprocess.TimeoutExpired:
+        return {
+            "success": False,
+            "error": f"Command timed out after 30 seconds: {command}",
+            "command": command,
+            "return_code": -1
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "command": command,
+            "return_code": -1
+        }
+
+
+def rewrite_todo_list(items: List[str], todo_list: List[TodoItem],
+                      next_todo_id: int) -> Dict[str, Any]:
+    """Rewrite TODO list with new pending items"""
+    # Keep completed and cancelled items
+    kept_items = [
+        item for item in todo_list
+        if item.status in [TodoStatus.COMPLETED, TodoStatus.CANCELLED]
+    ]
+    
+    # Create new pending items
+    new_items = []
+    for content in items:
+        new_items.append(TodoItem(
+            id=next_todo_id,
+            content=content,
+            status=TodoStatus.PENDING
+        ))
+        next_todo_id += 1
+    
+    # Update TODO list
+    updated_todo_list = kept_items + new_items
+    
+    return {
+        "success": True,
+        "kept_items": len(kept_items),
+        "new_items": len(new_items),
+        "total_items": len(updated_todo_list),
+        "next_todo_id": next_todo_id,
+        "todo_list": [item.to_dict() for item in updated_todo_list]
+    }
+
+
+def update_todo_status(updates: List[Dict[str, Any]], todo_list: List[TodoItem]) -> Dict[str, Any]:
+    """Update status of TODO items"""
+    updated_count = 0
+    
+    for update in updates:
+        item_id = update["id"]
+        new_status = TodoStatus(update["status"])
+        
+        for item in todo_list:
+            if item.id == item_id:
+                item.status = new_status
+                item.updated_at = datetime.now().isoformat()
+                updated_count += 1
+                break
+    
+    return {
+        "success": True,
+        "updated_items": updated_count,
+        "total_items": len(todo_list),
+        "todo_list": [item.to_dict() for item in todo_list]
+    }
 
 
 # Tool function definitions for agent

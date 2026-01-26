@@ -24,7 +24,7 @@ class RaptorConfig:
     local_llm_base_url: str = "http://localhost:11434/v1"
     local_llm_api_key: str = "EMPTY"
     # Model configuration
-    embedding_model: str = "text-embedding-3-small"
+    # embedding_model: str = "text-embedding-3-small"
     max_tokens: int = 2048
     temperature: float = 0.1
     chunk_size: int = 1000
@@ -45,7 +45,7 @@ class GraphRAGConfig:
     local_llm_base_url: str = "http://localhost:11434/v1"
     local_llm_api_key: str = "EMPTY"
     # Model configuration
-    embedding_model: str = "text-embedding-3-small"
+    # embedding_model: str = "text-embedding-3-small"
     chunk_size: int = 1200
     chunk_overlap: int = 100
     max_knowledge_triples: int = 10
