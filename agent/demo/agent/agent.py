@@ -7,47 +7,31 @@ including timestamps, tool call tracking, TODO lists, and detailed error message
 import json
 import os
 import sys
-import subprocess
 import platform
 import logging
 from typing import List, Dict, Any, Optional, Tuple
-from dataclasses import dataclass, field
-from enum import Enum
 from datetime import datetime, timedelta
 from openai import OpenAI
 import traceback
 
-from tools import get_tool_definitions, read_file, write_file, code_interpreter, execute_command, rewrite_todo_list, update_todo_status, TodoItem, TodoStatus
+from agent.config import SystemHintConfig
+from agent.tools import (
+    ToolCall,
+    get_tool_definitions,
+    read_file,
+    write_file,
+    code_interpreter,
+    execute_command,
+    rewrite_todo_list,
+    update_todo_status,
+    TodoItem,
+    TodoStatus,
+    KnowledgeBaseTools
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class ToolCall:
-    """Represents a single tool call with enhanced tracking"""
-    tool_name: str
-    arguments: Dict[str, Any]
-    result: Optional[Any] = None
-    error: Optional[str] = None
-    call_number: int = 1  # Track how many times this tool has been called
-    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-    duration_ms: Optional[int] = None
-
-
-@dataclass
-class SystemHintConfig:
-    """Configuration for system hints"""
-    enable_timestamps: bool = True
-    enable_tool_counter: bool = True
-    enable_todo_list: bool = True
-    enable_detailed_errors: bool = True
-    enable_system_state: bool = True  # Current dir, shell, etc.
-    timestamp_format: str = "%Y-%m-%d %H:%M:%S"
-    simulate_time_delay: bool = False  # For demo purposes
-    save_trajectory: bool = True  # Save conversation history to file
-    trajectory_file: str = "trajectory.json"  # File to save trajectory to
 
 
 class SystemHintAgent:
@@ -98,6 +82,9 @@ class SystemHintAgent:
         
         # Track last messages sent to LLM
         self.last_llm_messages = None
+
+        # Initialize knowledge base tools
+        self.kb_tools = KnowledgeBaseTools(self.config.knowledge_base)
         
         logger.info(f"System-Hint Agent initialized with provider: {self.provider}, model: {self.model}")
     
@@ -106,6 +93,11 @@ class SystemHintAgent:
         system_content = """You are an intelligent assistant with access to various tools for file operations, code execution, and system commands.
 
 Your task is to complete the given objectives efficiently using the available tools. Think step by step and use tools as needed.
+
+## Role Clarification:
+- You are an assistant that responds to user queries. Do NOT generate user-like questions.
+- Do NOT demonstrate rules by creating example questions. Simply follow the rules when answering.
+- Your responses should always be in the assistant role, never mimic user questions.
 
 ## TODO List Management Rules:
 - For any complex task with 3+ distinct steps, immediately create a TODO list using `rewrite_todo_list`
@@ -123,7 +115,7 @@ Your task is to complete the given objectives efficiently using the available to
 3. Notice tool call numbers (e.g., "Tool call #3") to avoid repetitive loops - if you see high numbers, change strategy
 4. Learn from detailed error messages to fix issues and adapt your approach
 5. Be aware of your current directory and system environment shown in system state
-6. When exploring projects, systematically read key files (README, main.py, agent.py) to understand structure
+9. **Be Accurate**: Never make up information. If something is unclear or not found, say so explicitly.
 
 ## Error Handling:
 - Read error messages carefully - they contain specific information about what went wrong
@@ -187,6 +179,8 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
             "provider": self.provider,
             "model": self.model,
             "conversation_history": self.conversation_history,
+            # Note: last_llm_messages is for debugging only - it shows what was sent to LLM
+            # including system hints that are not part of the actual conversation
             "last_llm_messages": self.last_llm_messages,
             "tool_calls": [
                 {
@@ -251,14 +245,18 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
         
         return "\n".join(lines)
     
-    def _get_system_hint(self) -> Optional[str]:
-        """Get system hint content with current state"""
+    def _get_system_hint(self, include_system_state: bool = True) -> Optional[str]:
+        """Get system hint content with current state
+        
+        Args:
+            include_system_state: Whether to include system state in the hint
+        """
         if not any([self.config.enable_system_state, self.config.enable_todo_list]):
             return None
         
         hint_parts = []
         
-        if self.config.enable_system_state:
+        if self.config.enable_system_state and include_system_state:
             hint_parts.append("=== SYSTEM STATE ===")
             hint_parts.append(self._get_system_state())
             hint_parts.append("")
@@ -324,6 +322,94 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
                         )
                         for item in result["todo_list"]
                     ]
+
+            elif tool_name == "knowledge_base_search":
+                query = arguments.get("query", "")
+                results = self.kb_tools.knowledge_base_search(query)
+                
+                # Log full trajectory when verbose
+                if self.config.agent.verbose:
+                    logger.info("=" * 80)
+                    logger.info(f"TOOL EXECUTION: {tool_name}")
+                    logger.info("-" * 80)
+                    logger.info(f"Query: {query}")
+                    logger.info("-" * 80)
+                
+                if not results:
+                    if self.config.agent.verbose:
+                        logger.info("Results: No relevant documents found")
+                        logger.info("=" * 80)
+                    result = {"status": "no_results", "message": "No relevant documents found"}
+                else:
+                    # Format results for agent - KEEP ALL RESULTS
+                    formatted_results = []
+                    for i, r in enumerate(results, 1):
+                        formatted_results.append({
+                            "doc_id": r["doc_id"],
+                            "chunk_id": r["chunk_id"],
+                            "text": r["text"],
+                            "score": r["score"]
+                        })
+                        
+                        # Log each result in full detail
+                        if self.config.agent.verbose:
+                            logger.info(f"Result {i}/{len(results)}:")
+                            logger.info(f"  Document ID: {r['doc_id']}")
+                            logger.info(f"  Chunk ID: {r['chunk_id']}")
+                            logger.info(f"  Score: {r['score']:.4f}")
+                            logger.info(f"  Text (full):\n{'-' * 40}")
+                            logger.info(r['text'])
+                            logger.info("-" * 40)
+                    
+                    if self.config.agent.verbose:
+                        logger.info(f"Total results found: {len(results)}")
+                        logger.info("=" * 80)
+                    
+                    result = {
+                        "status": "success",
+                        "results": formatted_results[:3],  # Limit to top 3 for LLM context
+                        "total_found": len(results),
+                        "all_results": formatted_results  # Keep all for logging
+                    }
+                
+            elif tool_name == "get_document":
+                doc_id = arguments.get("doc_id", "")
+                
+                # Log full trajectory when verbose
+                if self.config.agent.verbose:
+                    logger.info("=" * 80)
+                    logger.info(f"TOOL EXECUTION: {tool_name}")
+                    logger.info("-" * 80)
+                    logger.info(f"Document ID: {doc_id}")
+                    logger.info("-" * 80)
+                
+                document = self.kb_tools.get_document(doc_id)
+                
+                if "error" in document:
+                    if self.config.agent.verbose:
+                        logger.info(f"Error: {document['error']}")
+                        logger.info("=" * 80)
+                    result = {"status": "error", "message": document["error"]}
+                else:
+                    # Log full document content
+                    if self.config.agent.verbose:
+                        logger.info("Document Retrieved:")
+                        logger.info(f"  Doc ID: {document.get('doc_id', doc_id)}")
+                        if document.get('metadata'):
+                            logger.info(f"  Metadata: {json.dumps(document['metadata'], indent=2, ensure_ascii=False)}")
+                        logger.info("  Content (full):\n" + "=" * 40)
+                        logger.info(document.get('content', ''))
+                        logger.info("=" * 80)
+                    
+                    result = {
+                        "status": "success",
+                        "document": {
+                            "doc_id": document.get("doc_id", doc_id),
+                            "content": document.get("content", ""),
+                            "metadata": document.get("metadata", {})
+                        }
+                    }
+
             else:
                 error = f"Unknown tool: {tool_name}"
                 return {"error": error}, error
@@ -409,6 +495,7 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
         
         iteration = 0
         final_answer = None
+        consecutive_text_only = 0  # Track consecutive text-only responses
         
         while iteration < max_iterations:
             iteration += 1
@@ -423,7 +510,11 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
             try:
                 # Prepare messages for the model - add system hint as last user message
                 messages_to_send = self.conversation_history.copy()
-                system_hint = self._get_system_hint()
+                
+                # Only add full system hint on first iteration or when tools were used
+                # This prevents repetitive system state updates in text-only conversations
+                include_full_state = (iteration == 1 or consecutive_text_only == 0)
+                system_hint = self._get_system_hint(include_system_state=include_full_state)
                 if system_hint:
                     messages_to_send.append({"role": "user", "content": system_hint})
                 
@@ -457,6 +548,7 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
                 if hasattr(message, 'tool_calls') and message.tool_calls:
                     print("🧨🧨🧨🧨🧨🧨🧨message.tool_calls: ", message.content)
                     self.conversation_history.append(message.model_dump())
+                    consecutive_text_only = 0  # Reset counter when tools are used
                     
                     for tool_call in message.tool_calls:
                         function_name = tool_call.function.name
@@ -548,8 +640,31 @@ Important: When you have completed all tasks, clearly state "FINAL ANSWER:" foll
                     
                 elif message.content:
                     print("♨️♨️♨️♨️♨️♨️♨️message.content: ", message.content)
+                    
+                    # Clean the message content - remove any timestamp prefix that LLM might have incorrectly added
+                    cleaned_content = message.content
+                    # Remove timestamp pattern like "[2026-01-26 20:49:36] " from the beginning
+                    import re
+                    timestamp_pattern = r'^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] '
+                    cleaned_content = re.sub(timestamp_pattern, '', cleaned_content)
+                    
+                    # Create cleaned message
+                    cleaned_message = message.model_dump()
+                    if cleaned_content != message.content:
+                        logger.info(f"Cleaned timestamp from assistant message: '{message.content[:50]}...' -> '{cleaned_content[:50]}...'")
+                        cleaned_message["content"] = cleaned_content
+                    
                     # Regular assistant message
-                    self.conversation_history.append(message.model_dump())
+                    self.conversation_history.append(cleaned_message)
+                    
+                    # Check if we're stuck in text-only loop
+                    consecutive_text_only += 1
+                    if consecutive_text_only >= 3:
+                        logger.warning(f"Detected {consecutive_text_only} consecutive text-only responses. Generating final answer.")
+                        final_answer = cleaned_content
+                        # Save final trajectory
+                        self._save_trajectory(iteration, final_answer)
+                        break
                     
             except Exception as e:
                 logger.error(f"Error during task execution: {str(e)}")

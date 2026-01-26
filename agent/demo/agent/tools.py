@@ -6,11 +6,11 @@ import requests
 import os
 import subprocess
 from typing import Dict, Any, List, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 
-from config import KnowledgeBaseConfig, KnowledgeBaseType
+from agent.config import KnowledgeBaseConfig, KnowledgeBaseType
 from agent.indexer_raptor import RaptorIndexer
 from agent.indexer_graphrag import GraphRAGIndexer
 from agent.config import get_raptor_config, get_graphrag_config
@@ -72,6 +72,18 @@ class SearchResult:
         }
 
 
+@dataclass
+class ToolCall:
+    """Represents a single tool call with enhanced tracking"""
+    tool_name: str
+    arguments: Dict[str, Any]
+    result: Optional[Any] = None
+    error: Optional[str] = None
+    call_number: int = 1  # Track how many times this tool has been called
+    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+    duration_ms: Optional[int] = None
+
+
 class KnowledgeBaseTools:
     """Tools for interacting with knowledge base"""
     
@@ -109,8 +121,6 @@ class KnowledgeBaseTools:
         try:
             if self.config.type == KnowledgeBaseType.LOCAL:
                 return self._search_local(query)
-            elif self.config.type == KnowledgeBaseType.DIFY:
-                return self._search_dify(query)
             elif self.config.type == KnowledgeBaseType.RAPTOR:
                 return self._search_raptor(query)
             elif self.config.type == KnowledgeBaseType.GRAPHRAG:
