@@ -3,13 +3,11 @@ Test script for structured indexing with sample Intel x86 instruction documentat
 """
 
 import asyncio
-from pathlib import Path
 from loguru import logger
 
 from agent.config import get_raptor_config, get_graphrag_config
 from agent.indexer_raptor import RaptorIndexer
 from agent.indexer_graphrag import GraphRAGIndexer
-from agent.document_processor import DocumentProcessor
 
 
 # Sample Intel x86/x64 instruction documentation text

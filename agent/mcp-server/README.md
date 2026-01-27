@@ -193,7 +193,7 @@ cities:
   "mcpServers": {
     "weather": {
       "command": "python",
-      "args": ["/path/to/compute-go/agent/mcp/server.py", "--stdio"],
+      "args": ["/path/to/compute-go/agent/mcp-server/server.py", "--stdio"],
       "env": {}
     }
   }

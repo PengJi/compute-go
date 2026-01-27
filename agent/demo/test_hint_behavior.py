@@ -6,7 +6,7 @@ temporarily before sending to LLM, but not stored in conversation history.
 
 import os
 import json
-from agent import SystemHintAgent, SystemHintConfig
+from agent.agent import SystemHintAgent, SystemHintConfig
 
 def test_hint_behavior():
     """Test and demonstrate the system hint behavior"""

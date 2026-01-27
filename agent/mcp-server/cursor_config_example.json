@@ -3,7 +3,7 @@
     "weather": {
       "command": "python",
       "args": [
-        "/home/jipeng/compute-go/agent/mcp/server.py",
+        "/home/jipeng/compute-go/agent/mcp-server/server.py",
         "--stdio"
       ],
       "env": {},

@@ -4,7 +4,7 @@ Basic test to verify Agent functionality
 
 import os
 import sys
-from agent import SystemHintAgent, SystemHintConfig, TodoStatus
+from agent.agent import SystemHintAgent, SystemHintConfig, TodoStatus
 
 
 def test_basic_functionality():
