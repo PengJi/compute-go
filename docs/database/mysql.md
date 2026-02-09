@@ -33,9 +33,8 @@ registry.cn-beijing.aliyuncs.com/mysql6/mysql:8.0.27-buster
 docker pull mysql:8.0
 
 # 创建 MySQL 数据目录
-mkdir -p /home/jipeng/data/mysql/data
-mkdir -p /home/jipeng/data/mysql/conf
-mkdir -p /home/jipeng/data/mysql/log
+MYSQL_DIR=/home/jipeng/data/mysql
+mkdir -p "$MYSQL_DIR"/{data,conf,log}
 
 # 运行MySQL
 docker run -d \
@@ -43,9 +42,9 @@ docker run -d \
   --restart=always \
   --privileged=true \
   -p 3306:3306 \
-  -v /home/jipeng/data/mysql/data:/var/lib/mysql \
-  -v /home/jipeng/data/mysql/conf:/etc/mysql/conf.d \
-  -v /home/jipeng/data/mysql/log:/var/log/mysql \
+  -v "$MYSQL_DIR"/data:/var/lib/mysql \
+  -v "$MYSQL_DIR"/conf:/etc/mysql/conf.d \
+  -v "$MYSQL_DIR"/log:/var/log/mysql \
   -e MYSQL_ROOT_PASSWORD=root \
   -e TZ=Asia/Shanghai \
   -e MYSQL_ROOT_HOST='%' \
