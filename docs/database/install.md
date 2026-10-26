@@ -41,7 +41,7 @@ docker run -d \
   --name mysql8 \
   --restart=always \
   --privileged=true \
-  -p 3306:3306 \
+  -p 127.0.0.1:3306:3306 \
   -v "$MYSQL_DIR"/data:/var/lib/mysql \
   -v "$MYSQL_DIR"/conf:/etc/mysql/conf.d \
   -v "$MYSQL_DIR"/log:/var/log/mysql \
@@ -49,6 +49,24 @@ docker run -d \
   -e TZ=Asia/Shanghai \
   -e MYSQL_ROOT_HOST='%' \
   mysql:8.0 \
+  --character-set-server=utf8mb4 \
+  --collation-server=utf8mb4_unicode_ci
+
+# 示例
+MYSQL_DIR=/home/jipeng/nvme/mysql
+
+docker run -d \
+  --name mysql8-1 \
+  --restart=always \
+  --privileged=true \
+  -p 127.0.0.1:3306:3306 \
+  -v "$MYSQL_DIR"/data:/var/lib/mysql \
+  -v "$MYSQL_DIR"/conf:/etc/mysql/conf.d \
+  -v "$MYSQL_DIR"/log:/var/log/mysql \
+  -e MYSQL_ROOT_PASSWORD=root \
+  -e TZ=Asia/Shanghai \
+  -e MYSQL_ROOT_HOST='%' \
+  registry.cn-beijing.aliyuncs.com/mysql6/mysql:8.0.27-buster \
   --character-set-server=utf8mb4 \
   --collation-server=utf8mb4_unicode_ci
 ```
@@ -60,7 +78,7 @@ docker exec -it mysql8 bash
 mysql -uroot -p
 
 # 修改账号密码
-ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '123456';
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'root';
 FLUSH PRIVILEGES;
 
 # 在本地登录MySQL
