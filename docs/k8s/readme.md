@@ -1,5 +1,4 @@
-
-常用命令
+# 常用命令
 ```bash
 # 进入容器
 kubectl exec -it prometheus-k8s-0 -c prometheus -n monitoring -- /bin/sh
