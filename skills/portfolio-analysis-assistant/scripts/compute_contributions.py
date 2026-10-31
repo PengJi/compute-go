@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""持仓主题贡献计算器（portfolio-analysis 技能配套脚本）。
+"""持仓主题贡献计算器（portfolio-analysis-assistant 技能配套脚本）。
 
 用途：持仓标的较多（超过 5 个）时，把持仓表写入 CSV，用本脚本计算
 各主题的权重占比、主题加权收益率与绝对贡献（权重 × 收益率），并做

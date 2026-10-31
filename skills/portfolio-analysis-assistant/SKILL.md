@@ -1,5 +1,5 @@
 ---
-name: portfolio-analysis
+name: portfolio-analysis-assistant
 description: Use when 用户提供基金/股票持仓清单（代码/名称/金额/权重，文字或截图均可），希望分析持仓收益、诊断组合健康度时。覆盖场景：分析持仓收益、持仓诊断、持仓体检、基金组合复盘、收益归因、看看基金搭配是否合理、仓位是否过于集中、组合风险排查、极端行情下会亏多少、portfolio review。用户无需事先指定主题分类。
 ---
 
